@@ -1,0 +1,68 @@
+{% extends 'base/vtc/body.html' %}
+
+{% block content %}
+    <form method="post" enctype="multipart/form-data">
+        <div class="card card-default">
+            <div class="card-header">
+                <h3 class="card-title">
+                    {% if action == 'add' %}
+                    <i class="fas fa-plus"></i>
+                    {% else %}
+                    <i class="fas fa-edit"></i>
+                    {% endif %}
+                    {{ title }}
+                </h3>
+            </div>
+            <div class="card-body">
+                
+                {% csrf_token %}
+                <input type="hidden" name="action" value="{{action}}">
+               {% if form.errors  %}
+                    <div class="alert alert-danger">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
+                        <h5><i class="icon fas fa-ban"></i>Ha ocurrido un error al guardar el registro</h5>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                {{ form }}
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary btn-flat btnTest">
+                    <i class="fas fa-plus"></i> Guardar registro
+                </button>
+                <a href="{{list_url}}" class="btn btn-info btn-flat btnTest">
+                     Cancelar
+                </a>
+            </div>
+        </div>
+    </form>
+    <script type="application/javascript">
+        {% if form.errors  %}
+        var errors = '';
+            {% for field in form %}
+                {% for error in field.errors %}
+                    errors += '{{ error }}\n';
+                {% endfor %}
+            {% endfor %}
+        
+        Swal.fire({
+            title: 'Error!',
+            text: errors,
+            icon: 'error'
+        });
+        {% endif %}
+
+        $('form').on('submit', function(e){
+            var content = "{{content_jqueryConfirm}}"
+            var urlpathlist = "{{list_url}}"
+            var parameters = new FormData(this);
+            e.preventDefault();
+            envio_withajax(parameters,content, urlpathlist)
+        });
+    </script>
+{% endblock %}

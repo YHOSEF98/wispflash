@@ -1,0 +1,36 @@
+{% extends 'base/list.html' %}
+
+{% block columns %}
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Nombre</th>
+        <th scope="col">Ip</th>
+        <th scope="col">Usuario</th>
+        <th scope="col">Contraseña</th>
+        <th scope="col">Acciones</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+    {% for m in object_list %}
+        <tr>
+            <td> {{m.id}}</td>
+            <td> {{m.nombre}}</td>
+            <td> {{m.ip}}</td>
+            <td> {{m.usuario}}</td>
+            <td> {{m.contraseña}}</td>
+            <td>
+                <a href="{% url 'mikrodetail' m.id %}" type="button" class="btn btn-warning btn-xs btn-flat">
+                    <i class="far fa-eye"></i>
+                </a>
+                <a href="{% url 'mikroedit' m.id %}" type="button" class="btn btn-warning btn-xs btn-flat">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href=" {% url 'mikrodelet' m.id %}" type="button" class="btn btn-danger btn-xs btn-flat">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    
+{% endblock %}

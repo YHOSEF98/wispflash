@@ -1,0 +1,86 @@
+{% extends 'base/vtc/body.html' %}
+{% load static %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'base/lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}"/>
+    <link rel="stylesheet"
+          href="{% static 'base/lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}"/>
+    <script src="{% static 'base/lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'base/lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'base/lib/datatables-1.10.20/plugins/responsive-2.2.3/js/dataTables.responsive.min.js' %}"></script>
+    <script src="{% static 'base/lib/datatables-1.10.20/plugins/responsive-2.2.3/js/responsive.bootstrap4.min.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="card card-default">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fas fa-search"></i>
+                {{ title }}
+            </h3>
+        </div>
+        {% if aviso  %}
+        <div id="aviso-container" class="alert alert-success alert-dismissible">
+            <h5><i class="icon fas fa-check"></i> {{aviso}}</h5>
+        </div>
+        {% endif %}
+        <div class="card-body">
+            <table class="table" id="data">
+                <thead>
+                {% block columns %}
+
+                {% endblock %}
+                </thead>
+                <tbody>
+                {% block rows %}
+
+                {% endblock %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer">
+            <a href="{{create_url}}" class="btn btn-primary btn-flat btnTest">
+                <i class="fas fa-plus"></i> Nuevo registro
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script type="application/javascript">
+        $(function () {
+            $('#data').DataTable({
+                responsive: true,
+                autoWidth: false
+            });
+
+            $('.btnTest').on('click', function(){
+                var parameters = $(this).serializeArray();
+                $.ajax({
+                    url: '{{list_url}}',
+                    type: 'POST',
+                    data: parameters,
+                    dataType: 'json',
+                }).done(function(data){
+                    console.log(data)
+                }).fail(function(jqXHR, textStatus, errorThrown){
+                    alert(textStatus+' : ' errorThrown);
+                }).always(function(data){
+
+                })
+            })
+        });
+
+        $(document).ready(function() {
+            // Verificar si hay un aviso presente
+            if ($('#aviso-container').length) {
+                // Esperar 2 segundos y luego ocultar el aviso
+                setTimeout(function() {
+                    $('#aviso-container').fadeOut('slow', function() {
+                        // Eliminar el elemento del DOM una vez que se haya ocultado
+                        $(this).remove();
+                    });
+                }, 2000);
+            }
+        });
+    </script>
+{% endblock %}

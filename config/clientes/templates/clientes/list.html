@@ -1,0 +1,37 @@
+{% extends 'base/list.html' %}
+
+{% block columns %}
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Nombre</th>
+        <th scope="col">Identificacion</th>
+        <th scope="col">Municipio</th>
+        <th scope="col">Corregimiento</th>
+        <th scope="col">Direccion</th>
+        <th scope="col">Celular</th>
+        <th scope="col">Acciones</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+    {% for c in object_list %}
+        <tr>
+            <td> {{c.id}}</td>
+            <td> {{c.nombre}}</td>
+            <td> {{c.documento}}</td>
+            <td> {{c.municipio}}</td>
+            <td> {{c.corregimiento}}</td>
+            <td> {{c.direccion}}</td>
+            <td> {{c.celular}}</td>
+            <td>
+                <a href="{% url 'clientedit' c.id %}" type="button" class="btn btn-warning btn-xs btn-flat">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'clientedelet' c.id %}" type="button" class="btn btn-danger btn-xs btn-flat">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    
+{% endblock %}

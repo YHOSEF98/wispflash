@@ -1,0 +1,35 @@
+{% extends 'base/list.html' %}
+
+{% block columns %}
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Nombre</th>
+        <th scope="col">Fecha de factura</th>
+        <th scope="col">Pago</th>
+        <th scope="col">Corte</th>
+        <th scope="col">Periodo</th>
+        <th scope="col">Acciones</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+    {% for m in object_list %}
+        <tr>
+            <td> {{m.id}}</td>
+            <td> {{m.nombre}}</td>
+            <td> {{m.afacturar}}</td>
+            <td> {{m.apagar}}</td>
+            <td> {{m.acortar}}</td>
+            <td> {{m.periodocobrar}}</td>
+            <td>
+                <a href="{% url 'grupocortedit' m.id %}" type="button" class="btn btn-warning btn-xs btn-flat">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href=" {% url 'grupocortedelet' m.id %}" type="button" class="btn btn-danger btn-xs btn-flat">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    
+{% endblock %}

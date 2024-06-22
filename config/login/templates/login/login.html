@@ -1,0 +1,77 @@
+{% extends 'base/home.html' %}
+{% load widget_tweaks %}
+{% block body %}
+<body class="hold-transition login-page">
+    <div class="login-box">
+      <div class="login-logo">
+        <a href="../../index2.html"><b>Admin</b>LTE</a>
+      </div>
+      <!-- /.login-logo -->
+      <div class="card">
+        <div class="card-body login-card-body">
+          <p class="login-box-msg">{{title}}</p>
+    
+          <form action="." method="post">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+              {{form.username | add_class:'form-control'| attr:'placeholder:Ingrese su usuario' | attr:'autofocus:false'}}
+              <div class="input-group-append">
+                <div class="input-group-text">
+                  <span class="fas fa-envelope"></span>
+                </div>
+              </div>
+            </div>
+            <div class="input-group mb-3">
+              {{form.password | add_class:'form-control'| attr:'placeholder:Ingrese su Contraseña'}}
+              <div class="input-group-append">
+                <div class="input-group-text">
+                  <span class="fas fa-lock"></span>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-8">
+                <div class="icheck-primary">
+                  <input type="checkbox" id="remember">
+                  <label for="remember">
+                    Remember Me
+                  </label>
+                </div>
+              </div>
+              <!-- /.col -->
+              <div class="col-4">
+                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+              </div>
+              <!-- /.col -->
+            </div>
+          </form>
+        </div>
+        <!-- /.login-card-body -->
+      </div>
+    </div>
+    <!-- /.login-box -->
+    <script type="application/javascript">
+        {% if form.errors  %}
+        var errors = '';
+            {% for field in form %}
+                {% for error in field.errors %}
+                    errors += '{{ error }}\n';
+                {% endfor %}
+            {% endfor %}
+        
+        Swal.fire({
+            title: 'Error!',
+            text: 'Usuario o contraseña incorrectos',
+            icon: 'error'
+        });
+        {% endif %}
+    </script>
+    <!-- jQuery
+    <script src="../../plugins/jquery/jquery.min.js"></script>
+     Bootstrap 4 
+    <script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+     AdminLTE App 
+    <script src="../../dist/js/adminlte.min.js"></script>-->
+    
+    </body>
+{% endblock %}

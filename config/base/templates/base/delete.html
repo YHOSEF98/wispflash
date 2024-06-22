@@ -1,0 +1,51 @@
+{% extends 'base/vtc/body.html' %}
+
+{% block content %}
+    <form method="post">
+        <div class="card card-default">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-trash"></i>
+                    {{ title }}
+                </h3>
+            </div>
+            <div class="card-body">
+                
+                {% csrf_token %}
+                <input type="hidden" name="action" value="{{action}}">
+               {% if form.errors  %}
+                    <div class="alert alert-danger">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
+                        <h5><i class="icon fas fa-ban"></i>Ha ocurrido un error al guardar el registro</h5>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="alert alert-danger alert-dismissible">
+                    <h5><i class="icon fas fa-ban"></i> Notificacion!</h5>
+                    ¿{{content_jqueryConfirm}}  {{object.nombre}}?
+                </div>
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary btn-flat btnTest">
+                    <i class="fas fa-save"></i> Si. Eliminar
+                </button>
+                <a href="{{list_url}}" type="submit" class="btn btn-info btn-flat btnTest">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+            </div>
+        </div>
+    </form>
+    <script>
+        $('form').on('submit', function(e){
+            var parameters = $(this).serializeArray();
+            var content = "{{content_jqueryConfirm}}"
+            var urlpathlist = "{{list_url}}"
+            e.preventDefault();
+            envio_withajax(parameters,content, urlpathlist)
+        })
+    </script>
+{% endblock %}

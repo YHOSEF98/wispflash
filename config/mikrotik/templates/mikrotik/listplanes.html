@@ -1,0 +1,33 @@
+{% extends 'base/list.html' %}
+
+{% block columns %}
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Nombre</th>
+        <th scope="col">Precio</th>
+        <th scope="col">Velocidad</th>
+        <th scope="col">Tipo</th>
+        <th scope="col">Acciones</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+    {% for m in object_list %}
+        <tr>
+            <td> {{m.id}}</td>
+            <td> {{m.nombre}}</td>
+            <td> {{m.precio}}</td>
+            <td> {{m.velocidad}}</td>
+            <td> {{m.tipo}}</td>
+            <td>
+                <a href="{% url 'planesedit' m.id %}" type="button" class="btn btn-warning btn-xs btn-flat">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href=" {% url 'grupocortedelet' m.id %}" type="button" class="btn btn-danger btn-xs btn-flat">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    
+{% endblock %}
