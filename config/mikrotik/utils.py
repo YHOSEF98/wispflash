@@ -154,6 +154,24 @@ class apimikrotik:
 
         return self.data
 
+    def create_secret_pppoe(self, nombre_servicio, password, nombre_perfil):
+        if self.api is None:
+            self.data['error'] = 'No hay conexión a la API de Mikrotik.'
+            return
+        
+        try:
+            create_ppp = self.api.get_resource('/ppp/secrets')
+            secret_nuevo = {
+                'name': nombre_servicio,
+                'password': password,
+                'service': 'pppoe',
+                'profile': nombre_perfil
+            }
+            create_ppp.add(secret_nuevo)
+        except Exception as e:
+            self.data['error'] = str(e)
+            return self.data
+        
 def connection(host, username, password, port):
     api_pool = routeros_api.RouterOsApiPool(
         host=host,
