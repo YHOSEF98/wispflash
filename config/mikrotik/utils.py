@@ -33,10 +33,12 @@ class apimikrotik:
     def reiniciar_mikro(self):
         if self.api is None:
             self.data['error'] = 'No hay conexión a la API de Mikrotik.'
+            print("no hay conexion a la mikrptik")
             return
 
         try:
             self.api.get_resource('/system').call('reboot')
+            print("mikrotik reiniciada")
         except Exception as e:
             self.data['error'] = str(e)
 
@@ -45,26 +47,15 @@ class apimikrotik:
             self.api.close()
             self.api = None
 
-    def create_queue(self,queue_name, target_ip, 
-                 max_limit, burst_limit, limit_at,
-                burst_threshold, burst_time, priority, data
-                 ):
+    def create_queue(self, queue_params):
+
         if self.api is None:
             self.data['error'] = 'No hay conexión a la API de Mikrotik.'
+            print("no hay conexion")
             return
         
         try:
             # Definir los parámetros para crear la cola
-            queue_params = {
-                'name': queue_name,
-                'target': target_ip,
-                'max-limit': max_limit,
-                'burst-limit': burst_limit,
-                'limit-at': limit_at,
-                'burst-threshold': burst_threshold,
-                'burst-time': burst_time,
-                'priority': priority
-            }
             # Obtener el recurso de colas
             queues_resource = self.api.get_resource('/queue/simple')
 
@@ -528,10 +519,32 @@ def reiniciar_mikro(host, username, password, port, data):
         data['error'] = str(e)
 
 
-#data = {}
-#test_api = apimikrotik(ip='192.168.200.1', username='COMUNICAR', password='C0MUNIC4RS4S', port=8750, data=data)
-#test_api.reiniciar_mikro()
-#if 'error' in data:
-#    print(f"Error: {data['error']}")
-#else:
-#    print("El Mikrotik se está reiniciando.")   
+data = {}
+ip='192.168.100.25'
+username='admin'
+password='admin'
+port=8728
+queue_name="Prueba de creacion" 
+target_ip="192.168.1.100"
+max_limit = '10M/10M'
+burst_limit = 'unlimited'
+limit_at = 'unlimited'
+burst_threshold = 'unlimited'
+burst_time = '20s'
+priority = '8'
+
+queue_params = {
+    'name': "Prueba de creacion",
+    'target': "192.168.1.200",
+    'max-limit': '10M/10M',
+    'limit-at': '5M/5M',
+    'priority': '8'
+}
+test_api = apimikrotik(ip, username, password, port, data)
+test_api.create_queue(queue_params)
+
+# Verificar si hubo errores
+if 'error' in data:
+    print(f"Error: {data['error']}")
+else:
+    print("Queue creada exitosamente")

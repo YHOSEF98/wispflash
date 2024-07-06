@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .utils import aplicar_reglas, reiniciar_mikro, create_queue, editar_queue, eliminar_queue, deshabilitar_servicio
+from .utils import aplicar_reglas, reiniciar_mikro, create_queue, editar_queue, eliminar_queue, deshabilitar_servicio, apimikrotik
 from django.http import JsonResponse, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.decorators import login_required
@@ -223,12 +223,14 @@ class MikrotikreinicioView(DetailView):
     def post(self, request, *args, **kwargs):
         data = {}
         try:
+            reiniciar=apimikrotik()
             mikrotik = self.get_object()
             host = mikrotik.ip
             nombre = mikrotik.nombre
             username = mikrotik.usuario
             password = mikrotik.contraseña
             port = mikrotik.puertoapi
+            #reiniciar.reiniciar_mikro(host, username, password, port, data)
             reiniciar_mikro(host, username, password, port, data)
             aviso = f'La Mikrotik {nombre} a sido reiniciada'
             self.request.session['aviso'] = aviso       
