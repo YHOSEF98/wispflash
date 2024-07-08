@@ -53,9 +53,12 @@ class apimikrotik:
             self.data['error'] = 'No hay conexión a la API de Mikrotik.'
             print("no hay conexion")
             return
+
+        # queue_params={queue_name, target_ip, 
+        #          max_limit, burst_limit, limit_at,
+        #         burst_threshold, burst_time, priority, data} el name y el target_ip deben ser diferentes a otra cola yacreada
         
         try:
-            # Definir los parámetros para crear la cola
             # Obtener el recurso de colas
             queues_resource = self.api.get_resource('/queue/simple')
 
@@ -68,12 +71,23 @@ class apimikrotik:
             
         return data
 
-    def editar_queue(self, queue_name, new_name, target_ip, max_limit, burst_limit, limit_at, burst_threshold, burst_time,priority, data):
+    def editar_queue(self, queue_name, queue_params):
 
         if self.api is None:
             self.data['error'] = 'No hay conexión a la API de Mikrotik.'
             return
-
+            #     queue_params = {
+            #     'name': new_name,
+            #     'target': target_ip,
+            #     'max-limit': max_limit,
+            #     'limit-at': f'{limit_at_upload}/{limit_at_download}',
+            #     'priority': priority,
+            #     'burst-limit': f'{burst_limit_upload}/{burst_limit_download}',
+            #     'burst-threshold': f'{burst_threshold_upload}/{burst_threshold_download}',
+            #     'burst-time': f'{burst_time_upload}/{burst_time_download}',
+            #     'queue': f'{queue_type_upload}/{queue_type_download}',
+            #     'parent': parent
+            # } MODIFICAR LA VISTA PARA USAR CORRECTAMENTE LAS VARIABLES A ENVIAR EN LOS PARAMS
         try:
             queues_resource = self.api.get_resource('/queue/simple')
             # Obtener todas las colas
@@ -83,19 +97,8 @@ class apimikrotik:
             for queue in queues:
                 if queue['name'] == queue_name:
                     queue_to_edit = queue
-                    print(queue_to_edit)
+                    # print(queue_to_edit)
                     break
-            
-            queue_params = {
-                'name': new_name,
-                'target': target_ip,
-                'max-limit': max_limit,
-                'burst-limit': burst_limit,
-                'limit-at': limit_at,
-                'burst-threshold': burst_threshold,
-                'burst-time': burst_time,
-                'priority': priority
-            }
 
             if queue_to_edit:
                 queues_resource.set(id=queue_to_edit['id'], **queue_params)
@@ -113,35 +116,34 @@ class apimikrotik:
         return data
 
     def eliminar_queue(self, queue_name):
-        try:
-            if self.api in None:
-                self.data['error'] = "Mikrotik desconectada"
+        if self.api is None:
+            self.data['error'] = "Mikrotik desconectada"
+            return self.data
 
+        try:
             # Obtener el recurso de colas
             queues_resource = self.api.get_resource('/queue/simple')
 
             # Obtener todas las colas
             queues = queues_resource.get()
-            #print(queues)
 
             # Buscar la cola por nombre
             queue_to_delete = None
             for queue in queues:
                 if queue['name'] == queue_name:
                     queue_to_delete = queue
-                    # print(queue_to_delete)
                     break
 
             if queue_to_delete:
                 # Eliminar la cola utilizando el método remove()
                 queues_resource.remove(id=queue_to_delete['id'])
-                print("cola eliminada")
+                print("Cola eliminada")
                 return True
             else:
-                self.data['error'] = 'No se encontro el queue'
+                self.data['error'] = 'No se encontró la cola'
 
-        except Exception as e:       
-                self.data['error'] = str(e)
+        except Exception as e:
+            self.data['error'] = str(e)
 
         return self.data
 
@@ -524,27 +526,44 @@ ip='192.168.100.25'
 username='admin'
 password='admin'
 port=8728
-queue_name="Prueba de creacion" 
-target_ip="192.168.1.100"
+
+new_name = 'prueba de edicion 3'
+queue_name = "eliminar 3"
+target_ip = "192.168.1.201"
 max_limit = '10M/10M'
-burst_limit = 'unlimited'
-limit_at = 'unlimited'
-burst_threshold = 'unlimited'
-burst_time = '20s'
+burst_limit_upload = '14M'
+burst_limit_download = '14M'
+burst_threshold_upload = '14M'
+burst_threshold_download = '14M'
+limit_at_upload = '5M'
+limit_at_download = '5M'
+burst_time_upload = '20'
+burst_time_download = '20'
+queue_type_upload = 'default'
+queue_type_download = 'default'
+parent = 'none'
 priority = '8'
 
+
 queue_params = {
-    'name': "Prueba de creacion",
-    'target': "192.168.1.200",
-    'max-limit': '10M/10M',
-    'limit-at': '5M/5M',
-    'priority': '8'
+    'name': new_name,
+    'target': target_ip,
+    'max-limit': max_limit,
+    'limit-at': f'{limit_at_upload}/{limit_at_download}',
+    'priority': priority,
+    'burst-limit': f'{burst_limit_upload}/{burst_limit_download}',
+    'burst-threshold': f'{burst_threshold_upload}/{burst_threshold_download}',
+    'burst-time': f'{burst_time_upload}/{burst_time_download}',
+    'queue': f'{queue_type_upload}/{queue_type_download}',
+    'parent': parent
 }
 test_api = apimikrotik(ip, username, password, port, data)
-test_api.create_queue(queue_params)
+test_api.eliminar_queue(queue_name)
 
 # Verificar si hubo errores
 if 'error' in data:
     print(f"Error: {data['error']}")
 else:
-    print("Queue creada exitosamente")
+    print("Queue eliminada exitosamente")
+
+print(data)
