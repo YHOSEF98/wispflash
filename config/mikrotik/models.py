@@ -79,6 +79,7 @@ class planVelocidad(models.Model):
 class Servicio(models.Model):
     cli = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=50)
+    tiposervicio = models.CharField(max_length=12, choices=estado_servicio, default='IP estatica')
     servidor = models.ForeignKey(Mikrotik, on_delete=models.CASCADE)
     plan = models.ForeignKey(planVelocidad, on_delete=models.CASCADE)
     ip = models.CharField(max_length=15)
