@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .utils import aplicar_reglas, reiniciar_mikro, create_queue, editar_queue, eliminar_queue, deshabilitar_servicio, apimikrotik
+from .utils import apimikrotik
 from django.http import JsonResponse, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.decorators import login_required
@@ -583,6 +584,18 @@ class ServicioCreateView(CreateView):
                     burst_time = plan_instance.burst_time
                     priority = plan_instance.priority
                     
+                    # queue_params = {
+                    #     'name': new_name,
+                    #     'target': target_ip,
+                    #     'max-limit': max_limit,
+                    #     'limit-at': f'{limit_at_upload}/{limit_at_download}',
+                    #     'priority': priority,
+                    #     'burst-limit': f'{burst_limit_upload}/{burst_limit_download}',
+                    #     'burst-threshold': f'{burst_threshold_upload}/{burst_threshold_download}',
+                    #     'burst-time': f'{burst_time_upload}/{burst_time_download}',
+                    #     'queue': f'{queue_type_upload}/{queue_type_download}',
+                    #     'parent': parent
+                    # }
                     create_queue(host, username, password, port, queue_name, target_ip, max_limit, burst_limit, limit_at,
                                     burst_threshold, burst_time, priority, data)
                     data = form.save()

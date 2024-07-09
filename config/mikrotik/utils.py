@@ -9,6 +9,7 @@ class apimikrotik:
         self.port = port
         self.data = data
         self.api = None
+        self.api_pool = None
         self.connect()
 
     def connect(self):
@@ -43,16 +44,16 @@ class apimikrotik:
             self.data['error'] = str(e)
 
     def close(self):
-        if self.api is not None:
-            self.api.close()
-            self.api = None
+        if self.api_pool is not None:
+            self.api_pool.disconnect()
+            print("Conexión cerrada")
 
     def create_queue(self, queue_params):
 
         if self.api is None:
             self.data['error'] = 'No hay conexión a la API de Mikrotik.'
             print("no hay conexion")
-            return
+            return self.data
 
         # queue_params={queue_name, target_ip, 
         #          max_limit, burst_limit, limit_at,
@@ -65,11 +66,13 @@ class apimikrotik:
             # Crear la cola usando el método add()
             queues_resource.add(**queue_params)
 
-            print("Cola creada exitosamente")
         except Exception as e:       
                 data['error'] = str(e)
+
+        finally:
+            self.close()
             
-        return data
+        return self.data
 
     def editar_queue(self, queue_name, queue_params):
 
@@ -108,10 +111,12 @@ class apimikrotik:
                 print('no se encontro la queue')
                 data['error'] = 'No se encontro esta queue'
 
-            self.api.close()
-
         except Exception as e:       
                 data['error'] = str(e)
+
+        finally:
+            self.close()
+            print("conexion api cerrada")
 
         return data
 
@@ -145,6 +150,9 @@ class apimikrotik:
         except Exception as e:
             self.data['error'] = str(e)
 
+        finally:
+            self.close()
+
         return self.data
 
     def create_secret_pppoe(self, secret_nuevo):
@@ -166,30 +174,58 @@ class apimikrotik:
             self.data['error'] = str(e)
             return self.data
 
-    def deshabilitar_servicio(self, rule_params):
+        finally:
+            self.close()
+
+        return self.data
+
+    def deshabilitar_servicio(self, target_ip, rule_params):
         if self.api is None:
             self.data['error'] = 'No hay conexión a la API de Mikrotik.'
             return
         
         try:
-            # address_list = 'Mora'
+            # address_list = 'Morosos'
             # Definir los parámetros para crear la cola en la lista
             # rule_params = {
             #     'list': address_list,  # La cadena de reenvío
             #     'address': target_ip, # ip del cliente
             #     'comment': queue_name,  # Nombre de la queue
             # }
-
-            # Obtener el recurso de colas
             address_list = self.api.get_resource('/ip/firewall/address-list')
-            # Crear la cola usando el método add()
-            address_list.add(**rule_params)
+            addresses  = address_list.get()
+            rule_added = False
+
+            for address in addresses :
+                if address.get('address') == target_ip:
+                    if address.get('list') == 'Servicios_autorizados':
+                        print(address)
+                        address_list.remove(id=address.get('id'))
+                        print("queue elimnado de la lista Servicios_autorizados")
+                        address_list.add(**rule_params)
+                        print("queue agregado a la lista Morosos")
+                        rule_added = True
+                        break
+
+                    elif address.get('list') == 'Morosos':
+                        print("El servicio ya se encuentra deshabilitado")
+                        rule_added = True
+                        break
+
+            if not rule_added:
+                address_list.add(**rule_params)
+                print("Queue agregado a la lista servicio autorizado")
 
             print("Servicio deshabiitado")
         except Exception as e:
             data['error'] = str(e)
 
-    def habilitar_servicio(self, target_ip):
+        finally:
+            self.close()
+
+        return self.data
+
+    def habilitar_servicio(self, target_ip, rule_params):
         if self.api is None:
             self.data['error'] = 'No hay conexión a la API de Mikrotik.'
             return
@@ -197,17 +233,37 @@ class apimikrotik:
         try:
             address_list = self.api.get_resource('/ip/firewall/address-list')
             addresses  = address_list.get()
+            rule_added = False
+
             for address in addresses :
                 if address.get('address') == target_ip:
-                    print(address)
-                    address_list.remove(id=address.get('id'))
-                    print("queue elimnado de la lista para activar despues")
+                    if address.get('list') == 'Morosos':
+                        print(address)
+                        address_list.remove(id=address.get('id'))
+                        print("queue elimnado de la lista Morosos")
+                        address_list.add(**rule_params)
+                        print("queue agregado a la lista servicio autorizado")
+                        rule_added = True
+                        break
 
+                    elif address.get('list') == 'Servicios_autorizados':
+                        print("El servicio ya se encuentra habilitado")
+                        rule_added = True
+                        break
+
+            if not rule_added:
+                address_list.add(**rule_params)
+                print("Queue agregado a la lista servicio autorizado")
 
                 # Crear la cola usando el método add()
                 # queues_resource.add(**rule_params)
         except Exception as e:
             print("No se pudo establecer la conexión:", str(e))
+
+        finally:
+            self.close()
+
+        return self.data
 
 def connection(host, username, password, port):
     api_pool = routeros_api.RouterOsApiPool(
@@ -566,22 +622,22 @@ def reiniciar_mikro(host, username, password, port, data):
 
 
 data = {}
-ip='192.168.200.182'
-username='COMUNICAR'
-password='C0MUNIC4RS4S'
+ip='192.168.100.25'
+username='admin'
+password='admin'
 port=8728
 
 tipo_Servicio = 'IP estatica'
-address_list = 'Mora'
-target_ip = '10.10.40.6'
+address_list = 'Morosos'
+target_ip = '192.168.1.100'
 queue_name = 'cola de prueba'
 rule_params = {
-                 'list': address_list,  # La cadena de reenvío
-                 'address': target_ip, # ip del cliente
-                 'comment': queue_name,  # Nombre de la queue
-             }
+                'list': address_list,  # La cadena de reenvío
+                'address': target_ip, # ip del cliente
+                'comment': queue_name,  # Nombre de la queue
+                }
 # test_api = apimikrotik(ip, username, password, port, data)
-# test_api.habilitar_servicio(target_ip)
+# test_api.deshabilitar_servicio(target_ip, rule_params)
 
 # # Verificar si hubo errores
 # if 'error' in data:

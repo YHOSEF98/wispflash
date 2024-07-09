@@ -22,8 +22,8 @@ class Mikrotik(models.Model):
         return f'{self.nombre} - {self.ip}'
     
     def toJSON(self):
-         item = model_to_dict(self)
-         return item
+        item = model_to_dict(self)
+        return item
 
     class Meta:
         verbose_name = 'Mikrotik'
@@ -58,11 +58,19 @@ class planVelocidad(models.Model):
     nombre = models.CharField(max_length=50)
     precio = models.IntegerField()
     velocidad = models.CharField(max_length=9)
-    tipo = models.CharField(max_length=1, choices=tipoPlan, default='R')
-    burst_limit = models.CharField(max_length=7, default='0/0')
-    limit_at = models.CharField(max_length=7, default='0/0')
-    burst_threshold = models.CharField(max_length=13, default='0/0')
-    burst_time = models.CharField(max_length=5, default='0s/0s')
+    tipo = models.CharField(max_length=1, choices=tipoPlan, default='R')    
+    max_limit = models.CharField(max_length=7, default='10M/10M')
+    burst_limit_download = models.CharField(max_length=7, default='0')
+    burst_limit_upload = models.CharField(max_length=7, default='0')
+    limit_at_upload = models.CharField(max_length=7, default='0')
+    limit_at_download = models.CharField(max_length=7, default='0')
+    burst_threshold_upload = models.CharField(max_length=7, default='0')
+    burst_threshold_download = models.CharField(max_length=7, default='0')
+    burst_time_upload = models.CharField(max_length=5, default='0s')
+    burst_time_download = models.CharField(max_length=5, default='0s')
+    queue_type_upload = models.CharField(max_length=7, default='default')
+    queue_type_download = models.CharField(max_length=7, default='default')
+    parent = models.CharField(max_length=50, default='none')
     priority = models.CharField(max_length=3, default='8/8')
 
     class Meta:
@@ -73,8 +81,8 @@ class planVelocidad(models.Model):
             return f'{self.nombre} - {self.velocidad}'
     
     def toJSON(self):
-         item = model_to_dict(self)
-         return item
+        item = model_to_dict(self)
+        return item
 
 class Servicio(models.Model):
     cli = models.ForeignKey(Cliente, on_delete=models.CASCADE)

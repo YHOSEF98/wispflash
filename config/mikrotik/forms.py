@@ -94,14 +94,22 @@ class PlanesForm(ModelForm):
         model = planVelocidad
         fields = '__all__'
         labels = {
-            'nombre': 'Nombre',
+            'nombre': 'Nombre del plan',
             'precio': 'Precio',
             'velocidad': 'Velocidad',
             'tipo': 'Tipo de plan',
-            'burst_limit': 'Burst limit',
-            'limit_at': 'Limit at',
-            'burst_threshold': 'Burst threshold',
-            'burst_time': 'Burst time',
+            'max_limit' : 'Max limit, ejemplo: 10M/10M',
+            'burst_limit_download' : 'burst limit download',
+            'burst_limit_upload' : 'burst limit upload',
+            'limit_at_upload' : 'limit at upload',
+            'limit_at_download' : 'limit at download',
+            'burst_threshold_upload' : 'burst threshold upload',
+            'burst_threshold_download' : 'burst threshold download',
+            'burst_time_upload' : 'burst_time_upload',
+            'burst_time_download' : 'burst time download',
+            'queue_type_upload' : 'queue type upload',
+            'queue_type_download' : 'queue_type_upload',
+            'parent' : 'parent',
             'priority': 'Priority'
         }
         widgets = {
