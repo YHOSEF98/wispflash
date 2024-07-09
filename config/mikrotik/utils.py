@@ -48,14 +48,14 @@ class apimikrotik:
             self.api_pool.disconnect()
             print("Conexión cerrada")
 
-    def create_queue(self, queue_params):
+    def create_queue(self, secret_params):
 
         if self.api is None:
             self.data['error'] = 'No hay conexión a la API de Mikrotik.'
             print("no hay conexion")
             return self.data
 
-        # queue_params={queue_name, target_ip, 
+        # secret_params={queue_name, target_ip, 
         #          max_limit, burst_limit, limit_at,
         #         burst_threshold, burst_time, priority, data} el name y el target_ip deben ser diferentes a otra cola yacreada
         
@@ -64,7 +64,7 @@ class apimikrotik:
             queues_resource = self.api.get_resource('/queue/simple')
 
             # Crear la cola usando el método add()
-            queues_resource.add(**queue_params)
+            queues_resource.add(**secret_params)
 
         except Exception as e:       
                 data['error'] = str(e)
@@ -264,6 +264,21 @@ class apimikrotik:
             self.close()
 
         return self.data
+
+    def obtener_segmentos_ip(self):
+        if self.api is None:
+            self.data['error'] = 'No hay conexión a la API de Mikrotik.'
+            print("no hay conexion a la mikrptik")
+            return
+
+        try:
+            segmentos_resource = self.api.get_resource('/ip/address')
+            segmentos = segmentos_resource.get()
+            return [segmento['address'] for segmento in segmentos]
+
+        except Exception as e:
+            self.data['error'] = str(e)
+            return []
 
 def connection(host, username, password, port):
     api_pool = routeros_api.RouterOsApiPool(

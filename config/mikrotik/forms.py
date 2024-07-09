@@ -23,7 +23,8 @@ class MikrotikForm(ModelForm):
             'interfazWan': 'Interfaz Wan',
             'interfazlan': 'Interfaz LAN',
             'usuario': 'Usuario',
-            'contraseña': 'Contraseña'
+            'contraseña': 'Contraseña',
+            'segmento' : 'Segmentos de red'
         }
         widgets = {
             'nombre': TextInput(
@@ -139,6 +140,7 @@ class PlanesForm(ModelForm):
     
 class ServiciosForm(ModelForm):
     def __init__(self, *args, **kwargs):
+        segmentos_ip = kwargs.pop('segmentos_ip',[])
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
@@ -152,7 +154,11 @@ class ServiciosForm(ModelForm):
             'nombre': 'Nombre del servicio',
             'servidor':'Servidor',
             'grupocorte': 'Grupo de corte',
-            'tipofactura': 'Tipo de factura'
+            'tipofactura': 'Tipo de factura',
+            'estadoservicio':'Estado del servicio',
+            'tiposervicio':'Tipo de servicio',
+            'segmentoip' : 'Segmento de IP',
+            'ip' : 'IP Address'
         }
         widgets = {
             'nombre': TextInput(

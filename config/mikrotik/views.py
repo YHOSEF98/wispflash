@@ -598,6 +598,10 @@ class ServicioCreateView(CreateView):
 
                     crear_servicio = apimikrotik(host, username, password, port, data)
                     crear_servicio.create_queue(queue_params)
+                    # if form.instance.tiposervicio =='IP estatica':
+                    #     crear_servicio.create_queue(queue_params)
+                    # else:
+                    #     crear_servicio.create_secret_pppoe(secret_nuevo)
                     
                     data = form.save()
                     aviso = 'Servicio creado correctamente'

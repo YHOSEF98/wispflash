@@ -17,6 +17,7 @@ class Mikrotik(models.Model):
     interfazlan = models.CharField(max_length=50, null=True, blank=True)
     usuario = models.CharField(max_length=60)
     contraseña = models.CharField(max_length=50)
+    segmentos_ip = models.CharField(max_length=150, null=True, blank=True)
 
     def __str__(self):
         return f'{self.nombre} - {self.ip}'
@@ -87,12 +88,13 @@ class planVelocidad(models.Model):
 class Servicio(models.Model):
     cli = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=50)
-    tiposervicio = models.CharField(max_length=12, choices=estado_servicio, default='IP estatica')
+    estadoservicio = models.CharField(max_length=9, choices=estado_servicio, default='Activo')
+    tiposervicio = models.CharField(max_length=12, choices=tipo_servicio, default='IP estatica')
     servidor = models.ForeignKey(Mikrotik, on_delete=models.CASCADE)
     plan = models.ForeignKey(planVelocidad, on_delete=models.CASCADE)
+    segmentoip = models.CharField(max_length=18, blank=True, null=True)
     ip = models.CharField(max_length=15)
     zona = models.ForeignKey(Zona, on_delete=models.CASCADE, blank=True, null=True)
-    estado = models.CharField(max_length=9, choices=estado_servicio, default='Activo')
     grupocorte = models.ForeignKey(grupoCorte, on_delete=models.CASCADE, blank=True)
     tipofactura = models.CharField(max_length=10, blank=True, null=True)
     coordenas = models.CharField(max_length=40, blank=True, null=True)
