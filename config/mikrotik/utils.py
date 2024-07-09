@@ -2,8 +2,8 @@ import ssl
 import routeros_api
 
 class apimikrotik:
-    def __init__(self, ip, username, password, port, data):
-        self.ip = ip
+    def __init__(self, host, username, password, port, data):
+        self.ip = host
         self.username = username
         self.password = password
         self.port = port

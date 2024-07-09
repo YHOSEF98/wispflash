@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, TemplateView
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from unidecode import unidecode
 from .models import *
 from .forms import *
 # Create your views here.
@@ -562,6 +563,9 @@ class ServicioCreateView(CreateView):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
+    def limpiar_nombre(self, nombre):
+        return unidecode(nombre)
+
     def post(self, request, *args, **kwargs):
         data = {}
         try:
@@ -572,32 +576,29 @@ class ServicioCreateView(CreateView):
                     mikro_instance = form.cleaned_data['servidor']
                     plan_instance = form.cleaned_data['plan']
                     host = mikro_instance.ip
+                    port = mikro_instance.puertoapi
                     username = mikro_instance.usuario
                     password = mikro_instance.contraseña
-                    port = mikro_instance.puertoapi
-                    queue_name = form.cleaned_data['nombre']
-                    target_ip = form.cleaned_data['ip']
-                    max_limit = plan_instance.velocidad
-                    burst_limit = plan_instance.burst_limit
-                    limit_at = plan_instance.limit_at
-                    burst_threshold = plan_instance.burst_threshold
-                    burst_time = plan_instance.burst_time
-                    priority = plan_instance.priority
+
+                    nombre_limpiado = self.limpiar_nombre(form.cleaned_data['nombre'])
+                    form.instance.nombre = nombre_limpiado
                     
-                    # queue_params = {
-                    #     'name': new_name,
-                    #     'target': target_ip,
-                    #     'max-limit': max_limit,
-                    #     'limit-at': f'{limit_at_upload}/{limit_at_download}',
-                    #     'priority': priority,
-                    #     'burst-limit': f'{burst_limit_upload}/{burst_limit_download}',
-                    #     'burst-threshold': f'{burst_threshold_upload}/{burst_threshold_download}',
-                    #     'burst-time': f'{burst_time_upload}/{burst_time_download}',
-                    #     'queue': f'{queue_type_upload}/{queue_type_download}',
-                    #     'parent': parent
-                    # }
-                    create_queue(host, username, password, port, queue_name, target_ip, max_limit, burst_limit, limit_at,
-                                    burst_threshold, burst_time, priority, data)
+                    queue_params = {
+                        'name': nombre_limpiado,
+                        'target': form.cleaned_data['ip'],
+                        'max-limit': plan_instance.velocidad,
+                        'limit-at': f'{plan_instance.limit_at_upload}/{plan_instance.limit_at_download}',
+                        'priority': plan_instance.priority,
+                        'burst-limit': f'{plan_instance.burst_limit_upload}/{plan_instance.burst_limit_download}',
+                        'burst-threshold': f'{plan_instance.burst_threshold_upload}/{plan_instance.burst_threshold_download}',
+                        'burst-time': f'{plan_instance.burst_time_upload}/{plan_instance.burst_time_download}',
+                        'queue': f'{plan_instance.queue_type_upload}/{plan_instance.queue_type_download}',
+                        'parent': plan_instance.parent
+                    }
+
+                    crear_servicio = apimikrotik(host, username, password, port, data)
+                    crear_servicio.create_queue(queue_params)
+                    
                     data = form.save()
                     aviso = 'Servicio creado correctamente'
                     self.request.session['aviso'] = aviso

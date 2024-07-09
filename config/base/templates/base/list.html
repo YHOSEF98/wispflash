@@ -22,6 +22,13 @@
         <div id="aviso-container" class="alert alert-success alert-dismissible">
             <h5><i class="icon fas fa-check"></i> {{aviso}}</h5>
         </div>
+        
+        <script>
+            // Ocultar el aviso después de 2 segundos
+            setTimeout(function() {
+                document.getElementById("aviso-container").style.display = "none";
+            }, 2000);
+        </script>
         {% endif %}
         <div class="card-body">
             <table class="table" id="data">
