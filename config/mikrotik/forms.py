@@ -140,7 +140,6 @@ class PlanesForm(ModelForm):
     
 class ServiciosForm(ModelForm):
     def __init__(self, *args, **kwargs):
-        segmentos_ip = kwargs.pop('segmentos_ip',[])
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
@@ -179,7 +178,48 @@ class ServiciosForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
-    
+
+class ServiciosSlecForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+        self.fields['nombre'].widget.attrs['autofocus'] = True
+
+    class Meta:
+        model = Servicio
+        fields = '__all__'
+        labels = {
+            'cli': 'Cliente',
+            'nombre': 'Nombre del servicio',
+            'servidor':'Servidor',
+            'grupocorte': 'Grupo de corte',
+            'tipofactura': 'Tipo de factura',
+            'estadoservicio':'Estado del servicio',
+            'tiposervicio':'Tipo de servicio',
+            'segmentoip' : 'Segmento de IP',
+            'ip' : 'IP Address'
+        }
+        widgets = {
+            'nombre': TextInput(
+                attrs={
+                    'placeholder': 'Nombre del servicio'
+                }
+            )
+        }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                form.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
 class TestForm(Form):
     cliente = ModelChoiceField(queryset=Cliente.objects.all(), widget=Select(attrs={
         'class':'form-control',

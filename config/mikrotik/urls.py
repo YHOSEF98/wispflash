@@ -21,6 +21,7 @@ urlpatterns = [
     path("servicios/edit/<int:pk>", ServicioUpdateView.as_view(), name="serivcioedit"),
     path("servicios/delet/<int:pk>", ServicioDeleteView.as_view(), name="serivciodelet"),
     path("servicio/desh/<int:pk>", DeshabilitarServicioView.as_view(), name="serivciodesh"),
+    path("servicioselec/add/", ServicioCreateSelecView.as_view(), name="serivcioaddselec"),
     #path("test", test.as_view(), name="test"),
 ]
 
