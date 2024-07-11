@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.views import View
 from .utils import aplicar_reglas, reiniciar_mikro, create_queue, editar_queue, eliminar_queue, deshabilitar_servicio, apimikrotik
 from .utils import apimikrotik
 from django.http import JsonResponse, HttpResponseRedirect
@@ -248,6 +249,34 @@ class MikrotikreinicioView(DetailView):
         context["action"] = 'edit'
         context["content_jqueryConfirm"] = '¿Estas seguro reiniciar el Servidor?'
         return context
+
+class SegmentosIPView(View):
+    def get(self, request, *args, **kwargs):
+        mikrotik_id = request.GET.get('mikrotik_id')
+        print(f"Mikrotik ID recibido: {mikrotik_id}")
+
+        if mikrotik_id is None:
+            return JsonResponse({'error': 'No se proporcionó ID de Mikrotik'}, status=400)
+
+        try:
+            mikrotik_id = int(mikrotik_id)
+        except ValueError:
+            return JsonResponse({'error': 'ID de Mikrotik inválido'}, status=400)
+
+        try:
+            mikrotik = Mikrotik.objects.get(id=mikrotik_id)
+            print(f"Mikrotik encontrado: {mikrotik}")
+            segmentos = mikrotik.segmentos_ip
+            if segmentos:
+                segmentos_list = segmentos.split(',')
+                choices = [(segmento.strip(), segmento.strip()) for segmento in segmentos_list]
+            else:
+                choices = []
+            
+            return JsonResponse({'choices': choices})  # Nota: 'choices', no 'choice'
+
+        except Mikrotik.DoesNotExist:
+            return JsonResponse({'error': 'Mikrotik no encontrado'}, status=404)
 
 
 class GrupoCorteListView(ListView):
@@ -556,7 +585,7 @@ class ServiciosListView(ListView):
 class ServicioCreateView(CreateView):
     model = Servicio
     form_class = ServiciosForm
-    template_name = 'mikrotik/createform.html'
+    template_name = 'mikrotik/createformselec.html'
     success_url = reverse_lazy('serivcioslist')
 
     @method_decorator(login_required)
@@ -628,7 +657,7 @@ class ServicioCreateView(CreateView):
 class ServicioCreateSelecView(CreateView):
     model = Servicio
     form_class = ServiciosSlecForm
-    template_name = 'mikrotik/createform.html'
+    template_name = 'mikrotik/createformselec.html'
     success_url = reverse_lazy('serivcioslist')
 
     @method_decorator(login_required)

@@ -3,6 +3,7 @@ from .views import *
 
 urlpatterns = [
     path("list/", MikrotikListView.as_view(), name="mikrolist"),
+    path('segmentos-ip', SegmentosIPView.as_view(), name='segmentos-ip'),
     path("add/", MikrotikCreateView.as_view(), name="mikroadd"),
     path("edit/<int:pk>", MikrotikUpdateView.as_view(), name="mikroedit"),
     path("delet/<int:pk>", MikrotikDeleteView.as_view(), name="mikrodelet"),

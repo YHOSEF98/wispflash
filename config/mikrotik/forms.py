@@ -1,4 +1,5 @@
 from django.forms import *
+from django import forms
 from .models import *
 from clientes.models import Cliente
 
@@ -106,10 +107,10 @@ class PlanesForm(ModelForm):
             'limit_at_download' : 'limit at download',
             'burst_threshold_upload' : 'burst threshold upload',
             'burst_threshold_download' : 'burst threshold download',
-            'burst_time_upload' : 'burst_time_upload',
+            'burst_time_upload' : 'burst time upload',
             'burst_time_download' : 'burst time download',
             'queue_type_upload' : 'queue type upload',
-            'queue_type_download' : 'queue_type_upload',
+            'queue_type_download' : 'queue type download',
             'parent' : 'parent',
             'priority': 'Priority'
         }
@@ -144,6 +145,11 @@ class ServiciosForm(ModelForm):
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
         self.fields['nombre'].widget.attrs['autofocus'] = True
+        self.fields['segmentoip'].widget = forms.Select(
+            attrs={
+                'class': 'form-control'  # Añadir la clase 'form-control'
+            }
+        )
 
     class Meta:
         model = Servicio
@@ -186,6 +192,13 @@ class ServiciosSlecForm(ModelForm):
             form.field.widget.attrs['class'] = 'form-control'
         self.fields['nombre'].widget.attrs['autofocus'] = True
 
+        self.fields['segmentoip'].widget = forms.Select(
+            attrs={
+                'class': 'form-control'  # Añadir la clase 'form-control'
+            }
+        )
+
+    
     class Meta:
         model = Servicio
         fields = '__all__'
