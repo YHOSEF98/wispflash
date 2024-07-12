@@ -94,6 +94,9 @@ class Servicio(models.Model):
     plan = models.ForeignKey(planVelocidad, on_delete=models.CASCADE)
     segmentoip = models.CharField(max_length=18, blank=True, null=True)
     ip = models.CharField(max_length=15)
+    perfil =  models.CharField(max_length=50, blank=True, null=True)
+    userpppoe = models.CharField(max_length=50, blank=True, null=True)
+    passwordpppoe = models.CharField(max_length=50, blank=True, null=True)
     zona = models.ForeignKey(Zona, on_delete=models.CASCADE, blank=True, null=True)
     grupocorte = models.ForeignKey(grupoCorte, on_delete=models.CASCADE, blank=True)
     tipofactura = models.CharField(max_length=10, blank=True, null=True)
@@ -104,9 +107,9 @@ class Servicio(models.Model):
         verbose_name_plural = 'Servicios'
 
     def __str__(self):
-            return f'{self.nombre} - {self.ip}'
+        return f'{self.nombre} - {self.ip}'
     
     def toJSON(self):
-         item = model_to_dict(self)
-         return item
+        item = model_to_dict(self)
+        return item
 
