@@ -253,7 +253,6 @@ class MikrotikreinicioView(DetailView):
 class SegmentosIPView(View):
     def get(self, request, *args, **kwargs):
         mikrotik_id = request.GET.get('mikrotik_id')
-        print(f"Mikrotik ID recibido: {mikrotik_id}")
 
         if mikrotik_id is None:
             return JsonResponse({'error': 'No se proporcionó ID de Mikrotik'}, status=400)
@@ -726,17 +725,19 @@ class ServicioCreateSelecView(CreateView):
         context["content_jqueryConfirm"] = '¿Estas seguro de Crear el nuevo servicio?'
         return context    
 
-
 class ServicioUpdateView(UpdateView):
     model = Servicio
     form_class = ServiciosForm
-    template_name = 'mikrotik/createform.html'
+    template_name = 'mikrotik/createformselec.html'
     success_url = reverse_lazy('serivcioslist')
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
+    
+    def limpiar_nombre(self, nombre):
+        return unidecode(nombre)
 
     def post(self, request, *args, **kwargs):
         data = {}
@@ -753,16 +754,25 @@ class ServicioUpdateView(UpdateView):
                     password = mikro_instance.contraseña
                     port = mikro_instance.puertoapi
                     queue_name = servicio.nombre
-                    target_ip = form.cleaned_data['ip']
-                    max_limit = plan_instance.velocidad
-                    burst_limit = plan_instance.burst_limit
-                    limit_at = plan_instance.limit_at
-                    burst_threshold = plan_instance.burst_threshold
-                    burst_time = plan_instance.burst_time
-                    priority = plan_instance.priority
-                    new_name = form.cleaned_data['nombre']
+
+                    nombre_limpiado = self.limpiar_nombre(form.cleaned_data['nombre'])
+                    form.instance.nombre = nombre_limpiado
+
+                    queue_params = {
+                        'name': nombre_limpiado,
+                        'target': form.cleaned_data['ip'],
+                        'max-limit': plan_instance.velocidad,
+                        'limit-at': f'{plan_instance.limit_at_upload}/{plan_instance.limit_at_download}',
+                        'priority': plan_instance.priority,
+                        'burst-limit': f'{plan_instance.burst_limit_upload}/{plan_instance.burst_limit_download}',
+                        'burst-threshold': f'{plan_instance.burst_threshold_upload}/{plan_instance.burst_threshold_download}',
+                        'burst-time': f'{plan_instance.burst_time_upload}/{plan_instance.burst_time_download}',
+                        'queue': f'{plan_instance.queue_type_upload}/{plan_instance.queue_type_download}',
+                        'parent': plan_instance.parent
+                    }
                     
-                    editar_queue(host, username, password, port, queue_name, new_name, target_ip, max_limit, burst_limit, limit_at, burst_threshold, burst_time,priority, data)
+                    edit_queue = apimikrotik(host, username, password, port, data)
+                    edit_queue.editar_queue(queue_name, queue_params)
 
                     form.save()
                     aviso = 'Servicio editado correctamente'
@@ -805,7 +815,9 @@ class ServicioDeleteView(DeleteView):
             port = servicio.servidor.puertoapi
             queue_name = servicio.nombre
 
-            if eliminar_queue(host, username, password, port, queue_name, data):
+            delete_queue = apimikrotik(host, username, password, port,queue_name, data)
+            # if eliminar_queue(host, username, password, port, queue_name, data):
+            if delete_queue.eliminar_queue(queue_name):
                 self.object.delete()
                 aviso = 'Servicio eliminado correctamente'
                 self.request.session['aviso'] = aviso
