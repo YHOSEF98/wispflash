@@ -169,7 +169,6 @@ class apimikrotik:
             #     'profile': nombre_perfil
             # }
             create_ppp.add(**secret_nuevo)
-            self.api.close()
         except Exception as e:
             self.data['error'] = str(e)
             return self.data
@@ -279,6 +278,38 @@ class apimikrotik:
         except Exception as e:
             self.data['error'] = str(e)
             return []
+        
+        finally:
+            self.close()
+
+    def crear_perfil_pppoe(self,perfil_nuevo):
+        if self.api is None:
+            self.data['error'] = 'No hay conexión a la API de Mikrotik.'
+            print("no hay conexion a la mikrptik")
+            return
+        
+        try:
+            profile_ppp = self.api.get_resource('/ppp/profile')
+            # profile_nuevo = {
+            #     'name': nombre_servicio,
+            #     'use-mpls': password,
+            #     'use-compression': 'pppoe',
+            #     'use-encryption': 'default',
+            #     'only-one': 'default',
+            #     'change-tcp-mss': 'default',
+            #     'use-upnp': 'default',
+            #     'rate-limit': 'rate-limit',
+            #     'dns-server': 'default',
+            # }
+            profile_ppp.add(**perfil_nuevo)
+        except Exception as e:
+            self.data['error'] = str(e)
+            return self.data
+
+        finally:
+            self.close()
+
+        return self.data
 
 def connection(host, username, password, port):
     api_pool = routeros_api.RouterOsApiPool(

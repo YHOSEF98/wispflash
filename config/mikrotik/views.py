@@ -728,6 +728,7 @@ class ServicioDeleteView(DeleteView):
     template_name = 'mikrotik/deletemikrotik.html'
     success_url = reverse_lazy('serivcioslist')
 
+    @method_decorator(csrf_exempt)
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -742,13 +743,12 @@ class ServicioDeleteView(DeleteView):
             password = servicio.servidor.contraseña
             port = servicio.servidor.puertoapi
             queue_name = servicio.nombre
-
-            delete_queue = apimikrotik(host, username, password, port,queue_name, data)
+            delete_queue = apimikrotik(host, username, password, port, data)
             # if eliminar_queue(host, username, password, port, queue_name, data):
-            if delete_queue.eliminar_queue(queue_name):
-                self.object.delete()
-                aviso = 'Servicio eliminado correctamente'
-                self.request.session['aviso'] = aviso
+            delete_queue.eliminar_queue(queue_name)
+            self.object.delete()
+            aviso = 'Servicio eliminado correctamente'
+            self.request.session['aviso'] = aviso
         except Exception as e:
             data['error'] = str(e)    
         return JsonResponse(data)

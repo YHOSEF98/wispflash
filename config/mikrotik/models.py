@@ -30,6 +30,24 @@ class Mikrotik(models.Model):
         verbose_name = 'Mikrotik'
         verbose_name_plural = 'Servidores mikrotik'
 
+class PerfilPpp(models.Model):
+    mikrotik = models.ForeignKey(Mikrotik, on_delete=models.CASCADE)
+    nombre = models.CharField(max_length=50, verbose_name='Nombre', unique=True)
+    local_address = models.CharField(max_length=15, null=True, blank=True)
+    remote_address = models.CharField(max_length=15, null=True, blank=True)
+    dns1 = models.CharField(max_length=15, null=True, blank=True)
+    dns2 = models.CharField(max_length=15, null=True, blank=True)
+    change_tcp_mss = models.CharField(max_length=7, choices=no_yes, default='default')
+    use_upnp = models.CharField(max_length=7, choices=no_yes, default='default')
+    use_mpls = models.CharField(max_length=9, choices=no_yes_requiered, default='default')
+    use_compression = models.CharField(max_length=9, choices=no_yes_requiered, default='default')
+    use_encryption = models.CharField(max_length=9, choices=no_yes_requiered, default='default')
+    rate_limit = models.CharField(max_length=9, default='10M/10M')
+    only_one = models.CharField(max_length=7, choices=no_yes, default='default')
+
+    class Meta:
+        verbose_name = 'Perfil PPPoE'
+        verbose_name_plural = 'Perfiles PPPoE'
 
 class Segmentos(models.Model):
     mikro = models.ForeignKey(Mikrotik, on_delete=models.CASCADE)
