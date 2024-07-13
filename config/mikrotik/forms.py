@@ -147,58 +147,23 @@ class ServiciosForm(ModelForm):
         self.fields['nombre'].widget.attrs['autofocus'] = True
         self.fields['segmentoip'].widget = forms.Select(
             attrs={
-                'class': 'form-control'  # Añadir la clase 'form-control'
+                'class': 'form-control'
             }
         )
-
-    class Meta:
-        model = Servicio
-        fields = '__all__'
-        labels = {
-            'cli': 'Cliente',
-            'nombre': 'Nombre del servicio',
-            'servidor':'Servidor',
-            'grupocorte': 'Grupo de corte',
-            'tipofactura': 'Tipo de factura',
-            'estadoservicio':'Estado del servicio',
-            'tiposervicio':'Tipo de servicio',
-            'segmentoip' : 'Segmento de IP',
-            'ip' : 'IP Address'
-        }
-        widgets = {
-            'nombre': TextInput(
+        if self.fields['tiposervicio'] == 'PPPoE':
+            self.fields['perfil'].widget = forms.Select(
                 attrs={
-                    'placeholder': 'Nombre del servicio'
-                }
-            )
-        }
+                    'class': 'form-control',
+                    'required':'required'})
+            self.fields['userpppoe'].widget = forms.Select(
+                attrs={
+                    'class': 'form-control',
+                    'required':'required'})
+            self.fields['passwordpppoe'].widget = forms.Select(
+                attrs={
+                    'class': 'form-control',
+                    'required':'required'})
 
-    def save(self, commit=True):
-        data = {}
-        form = super()
-        try:
-            if form.is_valid():
-                form.save()
-            else:
-                data['error'] = form.errors
-        except Exception as e:
-            data['error'] = str(e)
-        return data
-
-class ServiciosSlecForm(ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for form in self.visible_fields():
-            form.field.widget.attrs['class'] = 'form-control'
-        self.fields['nombre'].widget.attrs['autofocus'] = True
-
-        self.fields['segmentoip'].widget = forms.Select(
-            attrs={
-                'class': 'form-control'  # Añadir la clase 'form-control'
-            }
-        )
-
-    
     class Meta:
         model = Servicio
         fields = '__all__'

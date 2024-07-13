@@ -111,3 +111,47 @@ function envio_withajax(parameters, content, urlpathlist){
         }
     })
 }
+
+function campos_tipo_servicio(elements){
+        var selectField = $('select[name="tiposervicio"]');
+        
+        function updateFields(option) {
+            switch (option) {
+                case "IP estatica":
+                    elements.ipddres.style.display = 'block';
+                    elements.idperfilpppoe.style.display = 'none';
+                    elements.labelperfilpppoe.style.display = 'none';
+                    elements.idpasswordppp.style.display = 'none';
+                    elements.labelpasswordppp.style.display = 'none';
+                    elements.ipuserppp.style.display = 'none';
+                    elements.labeluserpp.style.display = 'none';
+                    break;
+                case "PPPoE":
+                    elements.idperfilpppoe.style.display = 'block';
+                    elements.idperfilpppoe.required = true;
+                    elements.labelperfilpppoe.style.display = 'block';
+                    elements.idpasswordppp.style.display = 'block';
+                    elements.labelpasswordppp.style.display = 'block';
+                    elements.idpasswordppp.required = true;
+                    elements.ipuserppp.style.display = 'block';
+                    elements.labeluserpp.style.display = 'block';
+                    elements.ipuserppp.required = true;
+                    elements.ipddres.style.display = 'none';
+                    break;
+                default:
+                    elements.idperfilpppoe.style.display = 'none';
+                    elements.labelperfilpppoe.style.display = 'none';
+                    elements.idpasswordppp.style.display = 'none';
+                    elements.labelpasswordppp.style.display = 'none';
+                    elements.ipuserppp.style.display = 'none';
+                    elements.labeluserpp.style.display = 'none';
+                    elements.ipddres.style.display = 'none';
+                    break;
+            }
+        }
+        updateFields(selectField.val());
+        
+        selectField.on('change', function() {
+            updateFields($(this).val());
+        });
+    }

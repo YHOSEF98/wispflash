@@ -89,7 +89,7 @@ class Servicio(models.Model):
     cli = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=50)
     estadoservicio = models.CharField(max_length=9, choices=estado_servicio, default='Activo')
-    tiposervicio = models.CharField(max_length=12, choices=tipo_servicio, default='IP estatica')
+    tiposervicio = models.CharField(max_length=12, choices=tipo_servicio, default='----------')
     servidor = models.ForeignKey(Mikrotik, on_delete=models.CASCADE)
     plan = models.ForeignKey(planVelocidad, on_delete=models.CASCADE)
     segmentoip = models.CharField(max_length=18, blank=True, null=True)

@@ -36,7 +36,7 @@
                     <i class="fas fa-plus"></i> Guardar registro
                 </button>
                 <a href="{{list_url}}" class="btn btn-info btn-flat btnTest">
-                     Cancelar
+                    Cancelar
                 </a>
             </div>
         </div>
@@ -64,36 +64,98 @@
             e.preventDefault();
             envio_withajax(parameters,content, urlpathlist)
         });
+        
         $(function(){
-          $('select[name="servidor"]').on('change', function(){
-            var id = $(this).val();
-            var selec_ip = $('select[name="segmentoip"]');
-            var options = '<option value="">-------------------</option>';
-            var urlpeticion = "/mikro/segmentos-ip?mikrotik_id=" + id;
-            if(id ==''){
-                selec_ip.html(options);
-                return false
-            }
-            $.ajax({
-                url: urlpeticion,
-                type: 'GET',
-                dataType: 'json'
-            }).done(function (response) {
-                    console.log("Respuesta recibida:", response);
-                    console.log(selec_ip)
-                    selec_ip.empty(); // Limpia las opciones existentes
-                    if (response.choices) {
-                        response.choices.forEach(function(choice) {
-                            options += '<option value="' + choice[0] + '">' + choice[1] + '</option>';
-                        });
-                    }else {
-                        message_error(data.error);
+                // Obtén los elementos una vez que el DOM esté listo
+                var elements = {
+                    idperfilpppoe: document.getElementById('id_perfil'),
+                    labelperfilpppoe: document.querySelector('label[for="id_perfil"]'),
+                    idpasswordppp: document.getElementById('id_passwordpppoe'),
+                    labelpasswordppp: document.querySelector('label[for="id_passwordpppoe"]'),
+                    ipuserppp: document.getElementById('id_userpppoe'),
+                    labeluserpp: document.querySelector('label[for="id_userpppoe"]'),
+                    ipddres: document.getElementById('id_ip'),
+                    labelipddres: document.querySelector('label[for="id_ip"]')
+                };
+    
+                // Define la función para actualizar los campos según la opción seleccionada
+                function updateFields(option) {
+                    switch (option) {
+                        case "IP estatica":
+                            elements.labelipddres.style.display = 'block';
+                            elements.ipddres.style.display = 'block';
+                            elements.idperfilpppoe.style.display = 'none';
+                            elements.labelperfilpppoe.style.display = 'none';
+                            elements.idpasswordppp.style.display = 'none';
+                            elements.labelpasswordppp.style.display = 'none';
+                            elements.ipuserppp.style.display = 'none';
+                            elements.labeluserpp.style.display = 'none';
+                            break;
+                        case "PPPoE":
+                            elements.idperfilpppoe.style.display = 'block';
+                            elements.idperfilpppoe.required = true;
+                            elements.labelperfilpppoe.style.display = 'block';
+                            elements.idpasswordppp.style.display = 'block';
+                            elements.labelpasswordppp.style.display = 'block';
+                            elements.idpasswordppp.required = true;
+                            elements.ipuserppp.style.display = 'block';
+                            elements.labeluserpp.style.display = 'block';
+                            elements.ipuserppp.required = true;
+                            elements.ipddres.style.display = 'block';
+                            break;
+                        default:
+                            elements.idperfilpppoe.style.display = 'none';
+                            elements.labelperfilpppoe.style.display = 'none';
+                            elements.idpasswordppp.style.display = 'none';
+                            elements.labelpasswordppp.style.display = 'none';
+                            elements.ipuserppp.style.display = 'none';
+                            elements.labeluserpp.style.display = 'none';
+                            elements.ipddres.style.display = 'none';
+                            elements.labelipddres.style.display = 'none';
+                            break;
                     }
-                    selec_ip.html(options);
-            }).fail(function (jqXHR, textStatus, errorThrown) {
-                alert(textStatus + ':'+ errorThrown);
+                }
+    
+                // Inicializa el estado de los campos según el valor actual del select
+                var selectField = $('select[name="tiposervicio"]');
+                updateFields(selectField.val());
+    
+                // Configura el evento 'change' para actualizar los campos cuando cambia la selección
+                selectField.on('change', function() {
+                    updateFields($(this).val());
+                });
             });
-          });
+
+        $(function(){
+            $('select[name="servidor"]').on('change', function(){
+                var id = $(this).val();
+                var selec_ip = $('select[name="segmentoip"]');
+                var options = '<option value="">-------------------</option>';
+                var urlpeticion = "/mikro/segmentos-ip?mikrotik_id=" + id;
+                if(id ==''){
+                    selec_ip.html(options);
+                    return false
+                }
+                $.ajax({
+                    url: urlpeticion,
+                    type: 'GET',
+                    dataType: 'json'
+                }).done(function (response) {
+                        console.log("Respuesta recibida:", response);
+                        console.log(selec_ip)
+                        selec_ip.empty(); // Limpia las opciones existentes
+                        if (response.choices) {
+                            response.choices.forEach(function(choice) {
+                                options += '<option value="' + choice[0] + '">' + choice[1] + '</option>';
+                            });
+                        }else {
+                            message_error(data.error);
+                        }
+                        selec_ip.html(options);
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    alert(textStatus + ':'+ errorThrown);
+                });
+            });
         });
     </script>
 {% endblock %}
