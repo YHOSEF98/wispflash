@@ -42,7 +42,7 @@
         $('form').on('submit', function(e){
             var parameters = $(this).serializeArray();
             var content = "{{content_jqueryConfirm}}"
-            var urlpathlist = "{{list_url}}"
+            var urlpathlist = "{{list_url}}";
             e.preventDefault();
             envio_withajax(parameters,content, urlpathlist)
         })

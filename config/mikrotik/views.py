@@ -728,7 +728,7 @@ class ServicioDeleteView(DeleteView):
     template_name = 'mikrotik/deletemikrotik.html'
     success_url = reverse_lazy('serivcioslist')
 
-    @method_decorator(csrf_exempt)
+    # @method_decorator(csrf_exempt)
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -737,18 +737,21 @@ class ServicioDeleteView(DeleteView):
     def post(self, request, *args, **kwargs):
         data = {}
         try:
-            servicio = self.get_object()
-            host = servicio.servidor.ip
-            username = servicio.servidor.usuario
-            password = servicio.servidor.contraseña
-            port = servicio.servidor.puertoapi
-            queue_name = servicio.nombre
-            delete_queue = apimikrotik(host, username, password, port, data)
-            # if eliminar_queue(host, username, password, port, queue_name, data):
-            delete_queue.eliminar_queue(queue_name)
-            self.object.delete()
-            aviso = 'Servicio eliminado correctamente'
-            self.request.session['aviso'] = aviso
+            action = request.POST['action']
+            if action == 'delete':
+                form = self.get_form()
+                if form.is_valid():
+                    servicio = self.get_object()
+                    host = servicio.servidor.ip
+                    username = servicio.servidor.usuario
+                    password = servicio.servidor.contraseña
+                    port = servicio.servidor.puertoapi
+                    queue_name = servicio.nombre
+                    delete_queue = apimikrotik(host, username, password, port, data)
+                    delete_queue.eliminar_queue(queue_name)
+                    self.object.delete()
+                    aviso = 'Servicio eliminado correctamente'
+                    self.request.session['aviso'] = aviso
         except Exception as e:
             data['error'] = str(e)    
         return JsonResponse(data)
@@ -758,7 +761,7 @@ class ServicioDeleteView(DeleteView):
         context["title"] = 'Eliminacion de un servicio'
         context["entity"] = 'Grupo de corte'
         context["list_url"] = reverse_lazy('serivcioslist')
-        context["action"] = 'edit'
+        context["action"] = 'delete'
         context["content_jqueryConfirm"] = 'Estas seguro de eliminar este servicio'
         return context
 
