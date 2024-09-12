@@ -1,4 +1,5 @@
 from django.shortcuts import render
+import logging
 from django.views import View
 from .utils import aplicar_reglas, reiniciar_mikro, create_queue, editar_queue, eliminar_queue, deshabilitar_servicio, apimikrotik
 from .utils import apimikrotik
@@ -12,6 +13,8 @@ from unidecode import unidecode
 from .models import *
 from .forms import *
 # Create your views here.
+
+logger = logging.getLogger(__name__)
 
 class MikrotikListView(ListView):
     model = Mikrotik
@@ -613,7 +616,7 @@ class ServicioCreateView(CreateView):
                     
                     queue_params = {
                         'name': nombre_limpiado,
-                        'target': form.cleaned_data['ip'],
+                        'target': form.cleaned_data['ip_remote'],
                         'max-limit': plan_instance.velocidad,
                         'limit-at': f'{plan_instance.limit_at_upload}/{plan_instance.limit_at_download}',
                         'priority': plan_instance.priority,
@@ -624,16 +627,53 @@ class ServicioCreateView(CreateView):
                         'parent': plan_instance.parent
                     }
 
+                    secret_nuevo = {
+                        'name': nombre_limpiado,
+                        'password': password,
+                        'service': 'pppoe',
+                        'profile': form.cleaned_data['perfil'],
+                        'remote-address':form.cleaned_data['ip_remote'],
+                        'local-address':form.cleaned_data['ip_local']
+                    }
+
                     crear_servicio = apimikrotik(host, username, password, port, data)
-                    crear_servicio.create_queue(queue_params)
-                    # if form.instance.tiposervicio =='IP estatica':
-                    #     crear_servicio.create_queue(queue_params)
-                    # else:
-                    #     crear_servicio.create_secret_pppoe(secret_nuevo)
+                    # crear_servicio.create_queue(queue_params)
+                    tipo_servicio = form.cleaned_data['tiposervicio']
+
+                    logger.info(f"Tipo de servicio: {tipo_servicio}")
+                    logger.info(f"Parámetros del secret: {secret_nuevo}")
+                    print(secret_nuevo)
+
+                    servicio_creado = False
+                    try:
+                        if tipo_servicio == 'pppoe':
+                            servicio_creado = crear_servicio.create_secret_pppoe(secret_nuevo)
+                            print("servicio creado por ip pppoe")
+
+                            if servicio_creado:
+                                data = form.save()
+                                aviso = 'Servicio creado correctamente'
+                                self.request.session['aviso'] = aviso
+
+                            else:
+                                print("no se creo el servicio")
+                                print(secret_nuevo)
+
+                        elif tipo_servicio == 'estatica':
+                            servicio_creado = crear_servicio.create_queue(queue_params)
+                            print("servicio creado por estatica")
+
+                            if servicio_creado:
+                                data = form.save()
+                                aviso = 'Servicio creado correctamente'
+                                self.request.session['aviso'] = aviso
+
+                        
                     
-                    data = form.save()
-                    aviso = 'Servicio creado correctamente'
-                    self.request.session['aviso'] = aviso
+                    except Exception as e:
+                        logger.exception("Error al crear el servicio en Mikrotik")
+                        data['error'] = f'Error al crear el servicio: {str(e)}'
+                    
                 
                 else:
                     data['error'] = 'El formulario no es válido'
@@ -643,6 +683,38 @@ class ServicioCreateView(CreateView):
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
+    
+    # def crear_servicio(self, request):
+    #     form = self.get_form()
+    #     mikro_instance = form.cleaned_data['servidor']
+    #     plan_instance = form.cleaned_data['plan']
+    #     host = mikro_instance.ip
+    #     port = mikro_instance.puertoapi
+    #     username = mikro_instance.usuario
+    #     password = mikro_instance.contraseña
+
+    #     nombre_limpiado = self.limpiar_nombre(form.cleaned_data['nombre'])
+    #     queue_params = {
+    #                     'name': nombre_limpiado,
+    #                     'target': form.cleaned_data['ip'],
+    #                     'max-limit': plan_instance.velocidad,
+    #                     'limit-at': f'{plan_instance.limit_at_upload}/{plan_instance.limit_at_download}',
+    #                     'priority': plan_instance.priority,
+    #                     'burst-limit': f'{plan_instance.burst_limit_upload}/{plan_instance.burst_limit_download}',
+    #                     'burst-threshold': f'{plan_instance.burst_threshold_upload}/{plan_instance.burst_threshold_download}',
+    #                     'burst-time': f'{plan_instance.burst_time_upload}/{plan_instance.burst_time_download}',
+    #                     'queue': f'{plan_instance.queue_type_upload}/{plan_instance.queue_type_download}',
+    #                     'parent': plan_instance.parent
+    #                 }
+        
+    #     secret_nuevo = {
+    #             'name': nombre_limpiado,
+    #             'password': password,
+    #             'service': 'pppoe',
+    #             'profile': form.cleaned_data['perfil'],
+    #             'remote-address':form.cleaned_data['ip'],
+    #             'local-address':form.cleaned_data['segmentoip']
+    #         }
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

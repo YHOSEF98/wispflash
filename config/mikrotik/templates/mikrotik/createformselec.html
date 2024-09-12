@@ -81,7 +81,7 @@
                 // Define la función para actualizar los campos según la opción seleccionada
                 function updateFields(option) {
                     switch (option) {
-                        case "IP estatica":
+                        case "estatica":
                             elements.labelipddres.style.display = 'block';
                             elements.ipddres.style.display = 'block';
                             elements.idperfilpppoe.style.display = 'none';
@@ -91,7 +91,7 @@
                             elements.ipuserppp.style.display = 'none';
                             elements.labeluserpp.style.display = 'none';
                             break;
-                        case "PPPoE":
+                        case "pppoe":
                             elements.idperfilpppoe.style.display = 'block';
                             elements.idperfilpppoe.required = true;
                             elements.labelperfilpppoe.style.display = 'block';

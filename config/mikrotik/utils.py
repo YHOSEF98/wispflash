@@ -158,7 +158,8 @@ class apimikrotik:
     def create_secret_pppoe(self, secret_nuevo):
         if self.api is None:
             self.data['error'] = 'No hay conexión a la API de Mikrotik.'
-            return
+            return  False
+
         
         try:
             create_ppp = self.api.get_resource('/ppp/secret')
@@ -173,8 +174,6 @@ class apimikrotik:
             self.data['error'] = str(e)
             return self.data
 
-        finally:
-            self.close()
 
         return self.data
 
@@ -667,23 +666,22 @@ def reiniciar_mikro(host, username, password, port, data):
         data['error'] = str(e)
 
 
-data = {}
-ip='192.168.100.25'
-username='admin'
-password='admin'
-port=8728
+# data = {}
+# ip='181.119.67.235'
+# username='COMUNICAR'
+# password='C0MUNIC4RS4S'
+# port=8750
 
-tipo_Servicio = 'IP estatica'
-address_list = 'Morosos'
-target_ip = '192.168.1.100'
-queue_name = 'cola de prueba'
-rule_params = {
-                'list': address_list,  # La cadena de reenvío
-                'address': target_ip, # ip del cliente
-                'comment': queue_name,  # Nombre de la queue
-                }
+# secret_nuevo = {
+#         'name': "PRUEBA1",
+#         'password': "password",
+#         'service': 'pppoe',
+#         'profile': "10-megas",
+#         'remote-address': "192.168.18.6",
+#         'local-address': "192.168.18.5"
+#                     }
 # test_api = apimikrotik(ip, username, password, port, data)
-# test_api.deshabilitar_servicio(target_ip, rule_params)
+# test_api.create_secret_pppoe(secret_nuevo)
 
 # # Verificar si hubo errores
 # if 'error' in data:

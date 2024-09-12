@@ -6,7 +6,7 @@ periodo_ACobrar = [('A','Anticipado'),('V','Vencido')]
 
 estado_servicio = [('Activo','Activo'),('Inactivo','Inactivo')]
 
-tipo_servicio = [('----------','----------'),('IP estatica','IP estatica'),('PPPoE','PPPoE')]
+tipo_servicio = [('----------','----------'),('estatica','estatica'),('pppoe','pppoe')]
 
 no_yes = [
     ('no','no'),
