@@ -2,6 +2,7 @@
 
 {% block content %}
     <form method="post">
+        {% csrf_token %}
         <div class="card card-default">
             <div class="card-header">
                 <h3 class="card-title">
@@ -10,7 +11,6 @@
                 </h3>
             </div>
             <div class="card-body">
-                {% csrf_token %}
                 <input type="hidden" name="action" value="{{action}}">
                {% if form.errors  %}
                     <div class="alert alert-danger">
@@ -40,7 +40,7 @@
     </form>
     <script>
         $('form').on('submit', function(e){
-            var parameters = $(this).serializeArray();
+            var parameters = new FormData(this);
             var content = "{{content_jqueryConfirm}}"
             var urlpathlist = "{{list_url}}";
             e.preventDefault();

@@ -11,6 +11,7 @@ class apimikrotik:
         self.api = None
         self.api_pool = None
         self.connect()
+        self.mensaje = {}
 
     def connect(self):
         try:
@@ -67,18 +68,14 @@ class apimikrotik:
             queues_resource.add(**secret_params)
 
         except Exception as e:       
-                data['error'] = str(e)
-
-        finally:
-            self.close()
+                self.data['error'] = str(e)
             
         return self.data
 
-    def editar_queue(self, queue_name, queue_params):
-
+    def editar_queue(self, queue_name, queue_params, data):
         if self.api is None:
-            self.data['error'] = 'No hay conexión a la API de Mikrotik.'
-            return
+            data['error'] = 'No hay conexión a la API de Mikrotik.'
+            return False
             #     queue_params = {
             #     'name': new_name,
             #     'target': target_ip,
@@ -90,7 +87,7 @@ class apimikrotik:
             #     'burst-time': f'{burst_time_upload}/{burst_time_download}',
             #     'queue': f'{queue_type_upload}/{queue_type_download}',
             #     'parent': parent
-            # } MODIFICAR LA VISTA PARA USAR CORRECTAMENTE LAS VARIABLES A ENVIAR EN LOS PARAMS
+            # } 
         try:
             queues_resource = self.api.get_resource('/queue/simple')
             # Obtener todas las colas
@@ -113,12 +110,8 @@ class apimikrotik:
 
         except Exception as e:       
                 data['error'] = str(e)
+                return False
 
-        finally:
-            self.close()
-            print("conexion api cerrada")
-
-        return data
 
     def eliminar_queue(self, queue_name):
         if self.api is None:
@@ -150,19 +143,20 @@ class apimikrotik:
         except Exception as e:
             self.data['error'] = str(e)
 
-        finally:
-            self.close()
-
         return self.data
 
     def create_secret_pppoe(self, secret_nuevo):
         if self.api is None:
             self.data['error'] = 'No hay conexión a la API de Mikrotik.'
             return  False
-
+        else:
+            self.mensaje["secret1"]="ok acceso  ala mikrotik"
+            print(self.mensaje["secret1"])
         
         try:
             create_ppp = self.api.get_resource('/ppp/secret')
+            self.mensaje["secret2"]="accediendo a la ruta de creacion"
+            print(self.mensaje["secret2"])
             # secret_nuevo = {
             #     'name': nombre_servicio,
             #     'password': password,
@@ -170,26 +164,84 @@ class apimikrotik:
             #     'profile': nombre_perfil
             # }
             create_ppp.add(**secret_nuevo)
+            self.mensaje["secret3"]="creando el secret"
+            print(self.mensaje["secret3"])
+
+            return True
         except Exception as e:
             self.data['error'] = str(e)
-            return self.data
+            error_msg = f"Error al crear secret PPPoE: {str(e)}"
+            self.data['error'] = error_msg
+            self.mensaje["error"] = error_msg
+            return False
 
+        finally:
+            print("Resumen de la operación:")
+            for key, value in self.mensaje.items():
+                print(f"{key}: {value}")
 
-        return self.data
+    def editar_secret_pppoe(self, usuarioppp, secret_params,data):
+        if self.api is None:
+            data['error'] = 'No hay conexión a la API de Mikrotik.'
+            return False
+        try:
+            secrets_resource = self.api.get_resource('/ppp/secret')
+            secrets = secrets_resource.get()
+            secret_to_edit = None
+            for secret in secrets:
+                if secret['name'] == usuarioppp:
+                    secret_to_edit = secret
+                    break
 
-    def deshabilitar_servicio(self, target_ip, rule_params):
+            if secret_to_edit:
+                secrets_resource.set(id=secret_to_edit['id'], **secret_params)
+                print("pppoe actualizado")
+                return True
+            else:
+                print('no se encontro el secret')
+                data['error'] = 'No se encontro este secret'
+                return False
+            
+        except Exception as e:
+            data['error'] = str(e)
+            return False
+            
+    def eliminar_secret_ppp(self, usuarioppp, data):
+        if self.api is None:
+            self.data['error'] = 'No hay conexión a la API de Mikrotik.'
+            return False
+        
+        try:
+            secrets_resource = self.api.get_resource('/ppp/secret')
+            secrets = secrets_resource.get()
+            secret_to_delete = None
+            for secret in secrets:
+                if secret['name'] == usuarioppp:
+                    secret_to_delete = secret
+                    break
+
+            if secret_to_delete:
+                secrets_resource.remove(id=secret_to_delete['id'])
+                print("secret eliminada")
+                return True
+            else:
+                return False
+        except Exception as e:
+            data['error'] = str(e)
+            return False
+
+    def deshabilitar_servicio(self, target_ip,queue_name, address_list):
         if self.api is None:
             self.data['error'] = 'No hay conexión a la API de Mikrotik.'
             return
         
         try:
-            # address_list = 'Morosos'
             # Definir los parámetros para crear la cola en la lista
-            # rule_params = {
-            #     'list': address_list,  # La cadena de reenvío
-            #     'address': target_ip, # ip del cliente
-            #     'comment': queue_name,  # Nombre de la queue
-            # }
+            rule_params = {
+                'list': address_list,  # La cadena de reenvío
+                'address': target_ip, # ip del cliente
+                'comment': queue_name,  # Nombre de la queue
+            }
             address_list = self.api.get_resource('/ip/firewall/address-list')
             addresses  = address_list.get()
             rule_added = False
@@ -216,17 +268,20 @@ class apimikrotik:
 
             print("Servicio deshabiitado")
         except Exception as e:
-            data['error'] = str(e)
+            self.data['error'] = str(e)
 
-        finally:
-            self.close()
+        return True
 
-        return self.data
-
-    def habilitar_servicio(self, target_ip, rule_params):
+    def habilitar_servicio(self, target_ip, queue_name,address_list):
         if self.api is None:
             self.data['error'] = 'No hay conexión a la API de Mikrotik.'
             return
+        
+        rule_params = {
+                'list': address_list,  # La cadena de reenvío
+                'address': target_ip, # ip del cliente
+                'comment': queue_name,  # Nombre de la queue
+            }
 
         try:
             address_list = self.api.get_resource('/ip/firewall/address-list')
@@ -258,10 +313,7 @@ class apimikrotik:
         except Exception as e:
             print("No se pudo establecer la conexión:", str(e))
 
-        finally:
-            self.close()
-
-        return self.data
+        return True
 
     def obtener_segmentos_ip(self):
         if self.api is None:
@@ -667,21 +719,22 @@ def reiniciar_mikro(host, username, password, port, data):
 
 
 # data = {}
-# ip='181.119.67.235'
+# ip='192.168.200.1'
 # username='COMUNICAR'
 # password='C0MUNIC4RS4S'
 # port=8750
+# address_list = "Morosos"
+# target_ip = '192.168.200.56'
+# queue_name = "prueba de corte"
 
-# secret_nuevo = {
-#         'name': "PRUEBA1",
-#         'password': "password",
-#         'service': 'pppoe',
-#         'profile': "10-megas",
-#         'remote-address': "192.168.18.6",
-#         'local-address': "192.168.18.5"
-#                     }
+# rule_params = {
+#                 'list': address_list,  # La cadena de reenvío
+#                 'address': target_ip, # ip del cliente
+#                 'comment': queue_name,  # Nombre de la queue
+#             }
+# # deshabilitar_servicio(self, target_ip,queue_name, rule_params)
 # test_api = apimikrotik(ip, username, password, port, data)
-# test_api.create_secret_pppoe(secret_nuevo)
+# test_api.deshabilitar_servicio(target_ip,queue_name, rule_params)
 
 # # Verificar si hubo errores
 # if 'error' in data:

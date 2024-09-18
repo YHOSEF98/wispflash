@@ -7,7 +7,9 @@
         <h3 class="card-title">¿Deseas deshabilitar este servicio {{servicio.nombre}}?</h3>
         </div>
         
-        <form method="post" action="{% url 'serivciodesh' servicio.id %}">
+        <form method="post"  enctype="multipart/form-data">
+            
+            <input type="hidden" name="action" value="{{action}}">
             {% csrf_token %}
             {% if form.errors  %}
                     <div class="alert alert-danger">
@@ -22,24 +24,58 @@
                 {% endif %}
             <div class="card-body">
                 <div class="form-group">
-                <label for="exampleInputEmail1">Nombre</label>
+                    <label >Cliente</label>
+                    <div class="alert alert-info alert-dismissible">
+                        {{servicio.cli}}
+                    </div>
+                <div class="form-group">
+                <label for="exampleInputEmail1">Nombre servicio - Direccion</label>
                 <div class="alert alert-info alert-dismissible">
                     {{servicio.nombre}}
+                    {{ form }}
                 </div>
                 </div>
                 <div class="form-group">
                 <label for="exampleInputPassword1">Direccion IP</label>
                 <div class="alert alert-info alert-dismissible">
-                    {{servicio.ip}}
+                    {{servicio.ip_remote}}
                 </div>
                 </div>
                 </div>
                 <div class="card-footer">
-                <button type="submit" class="btn btn-success">Aplicar</button>
-                <a href="{% url 'serivciodesh' servicio.id %}"><button  type="button" class="btn btn-primary">No</button></a>
+                    <button type="submit" class="btn btn-success btnTest">
+                         Aplicar
+                    </button>
+                    <a href="{{list_url}}" class="btn btn-primary btn-flat btnTest">
+                         Cancelar
+                    </a>
                 </div>
             </div>
         </form>
     </div>
 </div>
+<script type="application/javascript">
+    {% if form.errors  %}
+    var errors = '';
+        {% for field in form %}
+            {% for error in field.errors %}
+                errors += '{{ error }}\n';
+            {% endfor %}
+        {% endfor %}
+    
+    Swal.fire({
+        title: 'Error!',
+        text: errors,
+        icon: 'error'
+    });
+    {% endif %}
+
+    $('form').on('submit', function(e){
+        var content = "{{content_jqueryConfirm}}"
+        var urlpathlist = "{{list_url}}"
+        var parameters = new FormData(this);
+        e.preventDefault();
+        envio_withajax(parameters,content, urlpathlist)
+    });
+</script>
 {% endblock %}

@@ -21,7 +21,7 @@
             <td> {{m.id}}</td>
             <td> {{m.cli}}</td>
             <td> {{m.nombre}}</td>
-            <td> {{m.ip}}</td>
+            <td> {{m.ip_remote}}</td>
             <td> {{m.estadoservicio}}</td>
             <td> {{m.servidor}}</td>
             <td> {{m.plan}}</td>
@@ -34,9 +34,15 @@
                 <a href="{% url 'serivcioedit' m.id %}" type="button" class="btn btn-warning btn-xs btn-flat">
                     <i class="fas fa-edit"></i>
                 </a>
-                <a href=" {% url 'serivciodesh' m.id %}" type="button" class="btn btn-danger btn-xs btn-flat">
+                {%if m.estadoservicio == "Activo"%}
+                <a href=" {% url 'serviciodesh' m.id %}" type="button" class="btn btn-danger btn-xs btn-flat">
                     <i class="fas fa-user-slash"></i>
                 </a>
+                {% elif m.estadoservicio == "Inactivo"  %}
+                <a href=" {% url 'serviciohab' m.id %}" type="button" class="btn btn-success btn-xs btn-flat">
+                    <i class="fas fa-user"></i>
+                </a>
+                {% endif%}
                 <a href=" {% url 'serivciodelet' m.id %}" type="button" class="btn btn-danger btn-xs btn-flat">
                     <i class="fas fa-trash-alt"></i>
                 </a>

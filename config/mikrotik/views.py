@@ -628,8 +628,8 @@ class ServicioCreateView(CreateView):
                     }
 
                     secret_nuevo = {
-                        'name': nombre_limpiado,
-                        'password': password,
+                        'name': form.cleaned_data['userpppoe'],
+                        'password': form.cleaned_data['passwordpppoe'],
                         'service': 'pppoe',
                         'profile': form.cleaned_data['perfil'],
                         'remote-address':form.cleaned_data['ip_remote'],
@@ -640,15 +640,10 @@ class ServicioCreateView(CreateView):
                     # crear_servicio.create_queue(queue_params)
                     tipo_servicio = form.cleaned_data['tiposervicio']
 
-                    logger.info(f"Tipo de servicio: {tipo_servicio}")
-                    logger.info(f"Parámetros del secret: {secret_nuevo}")
-                    print(secret_nuevo)
-
                     servicio_creado = False
                     try:
                         if tipo_servicio == 'pppoe':
                             servicio_creado = crear_servicio.create_secret_pppoe(secret_nuevo)
-                            print("servicio creado por ip pppoe")
 
                             if servicio_creado:
                                 data = form.save()
@@ -656,8 +651,13 @@ class ServicioCreateView(CreateView):
                                 self.request.session['aviso'] = aviso
 
                             else:
-                                print("no se creo el servicio")
-                                print(secret_nuevo)
+                                print("Fallo al crear servicio PPPoE")
+                                error_msg = crear_servicio.data.get('error', 'Error desconocido al crear PPPoE')
+                                print(f"Error detallado: {error_msg}")
+                                data['error'] = error_msg
+
+                                for key, value in crear_servicio.mensaje.items():
+                                    print(f"Mensaje de fallo en creación de PPPoE - {key}: {value}")
 
                         elif tipo_servicio == 'estatica':
                             servicio_creado = crear_servicio.create_queue(queue_params)
@@ -671,7 +671,6 @@ class ServicioCreateView(CreateView):
                         
                     
                     except Exception as e:
-                        logger.exception("Error al crear el servicio en Mikrotik")
                         data['error'] = f'Error al crear el servicio: {str(e)}'
                     
                 
@@ -683,38 +682,6 @@ class ServicioCreateView(CreateView):
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
-    
-    # def crear_servicio(self, request):
-    #     form = self.get_form()
-    #     mikro_instance = form.cleaned_data['servidor']
-    #     plan_instance = form.cleaned_data['plan']
-    #     host = mikro_instance.ip
-    #     port = mikro_instance.puertoapi
-    #     username = mikro_instance.usuario
-    #     password = mikro_instance.contraseña
-
-    #     nombre_limpiado = self.limpiar_nombre(form.cleaned_data['nombre'])
-    #     queue_params = {
-    #                     'name': nombre_limpiado,
-    #                     'target': form.cleaned_data['ip'],
-    #                     'max-limit': plan_instance.velocidad,
-    #                     'limit-at': f'{plan_instance.limit_at_upload}/{plan_instance.limit_at_download}',
-    #                     'priority': plan_instance.priority,
-    #                     'burst-limit': f'{plan_instance.burst_limit_upload}/{plan_instance.burst_limit_download}',
-    #                     'burst-threshold': f'{plan_instance.burst_threshold_upload}/{plan_instance.burst_threshold_download}',
-    #                     'burst-time': f'{plan_instance.burst_time_upload}/{plan_instance.burst_time_download}',
-    #                     'queue': f'{plan_instance.queue_type_upload}/{plan_instance.queue_type_download}',
-    #                     'parent': plan_instance.parent
-    #                 }
-        
-    #     secret_nuevo = {
-    #             'name': nombre_limpiado,
-    #             'password': password,
-    #             'service': 'pppoe',
-    #             'profile': form.cleaned_data['perfil'],
-    #             'remote-address':form.cleaned_data['ip'],
-    #             'local-address':form.cleaned_data['segmentoip']
-    #         }
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -747,20 +714,50 @@ class ServicioUpdateView(UpdateView):
                 form = self.get_form()
                 if form.is_valid():
                     servicio = self.get_object()
+                    #datos antes del cambio
+                    plan_anterior = servicio.plan
+                    mikro_instance_anterior = servicio.servidor
+                    host_a = mikro_instance_anterior.ip
+                    username_a= mikro_instance_anterior.usuario
+                    password_a= mikro_instance_anterior.contraseña
+                    port_a = mikro_instance_anterior.puertoapi
+                    queue_name_anterior = servicio.nombre
+                    usuarioppp_anterior = servicio.userpppoe
+                    tipo_servicio_anterior = servicio.tiposervicio
+                    nombre_mkt_anterior = mikro_instance_anterior.nombre
+                    servicio_eliminado = False
+                    delete_servicio_anterior = apimikrotik(host=host_a, username=username_a, password=password_a, port=port_a, data=data)
+                    
+                    #datos para el cambio
                     mikro_instance = form.cleaned_data['servidor']
                     plan_instance = form.cleaned_data['plan']
                     host = mikro_instance.ip
+                    nombre_mkt_nueva = mikro_instance.nombre
                     username = mikro_instance.usuario
                     password = mikro_instance.contraseña
                     port = mikro_instance.puertoapi
                     queue_name = servicio.nombre
-
+                    usuarioppp = servicio.userpppoe
                     nombre_limpiado = self.limpiar_nombre(form.cleaned_data['nombre'])
                     form.instance.nombre = nombre_limpiado
 
+                    if nombre_mkt_anterior !=   nombre_mkt_nueva:
+                        try:
+                            if tipo_servicio_anterior == "pppoe":
+                                delete_servicio_anterior.eliminar_secret_ppp(usuarioppp=usuarioppp_anterior, data=data)
+                            elif tipo_servicio_anterior == 'estatica':
+                                delete_servicio_anterior.eliminar_queue(queue_name=queue_name_anterior)
+
+                        except Exception as e:
+                            aviso1 = 'el servicio no fue eliminado de la mikrotik'
+                            self.request.session['aviso'] = aviso1
+                    else:
+                        pass
+
+
                     queue_params = {
                         'name': nombre_limpiado,
-                        'target': form.cleaned_data['ip'],
+                        'target': form.cleaned_data['ip_remote'],
                         'max-limit': plan_instance.velocidad,
                         'limit-at': f'{plan_instance.limit_at_upload}/{plan_instance.limit_at_download}',
                         'priority': plan_instance.priority,
@@ -771,15 +768,55 @@ class ServicioUpdateView(UpdateView):
                         'parent': plan_instance.parent
                     }
                     
-                    edit_queue = apimikrotik(host, username, password, port, data)
-                    edit_queue.editar_queue(queue_name, queue_params)
+                    secret_params = {
+                        'name': form.cleaned_data['userpppoe'],
+                        'password': form.cleaned_data['passwordpppoe'],
+                        'service': 'pppoe',
+                        'profile': form.cleaned_data['perfil'],
+                        'remote-address':form.cleaned_data['ip_remote'],
+                        'local-address':form.cleaned_data['ip_local']
+                    }
+                    servicio_editado = False
+                    edit_service = apimikrotik(host, username, password, port, data)
+                    tipo_servicio = form.cleaned_data['tiposervicio']
+                    try:
+                        if tipo_servicio == 'pppoe':
+                            servicio_editado = edit_service.editar_secret_pppoe(usuarioppp, secret_params,data)
 
-                    form.save()
-                    aviso = 'Servicio editado correctamente'
-                    self.request.session['aviso'] = aviso
+                            if servicio_editado:
+                                form.save()
+                                aviso = 'Servicio editado correctamente'
+                                self.request.session['aviso'] = aviso
+
+                            else:
+                                print("Fallo al editar el servicio PPPoE")
+                                data['error'] = "Fallo al editar el servicio PPPoE"
+
+                                # for key, value in edit_service.mensaje.items():
+                                #     print(f"Mensaje de fallo en creación de PPPoE - {key}: {value}")
+
+                        elif tipo_servicio == 'estatica':
+                            servicio_editado = edit_service.editar_queue(self, queue_name, queue_params, data)
+                            print("servicio creado por estatica")
+
+                            if servicio_editado:
+                                form.save()
+                                aviso = 'Servicio creado correctamente'
+                                self.request.session['aviso'] = aviso
+                            
+                            else:
+                                print("Fallo al editar el servicio")
+                                data['error'] = "Fallo al editar el servicio"
+
+                    except Exception as e:
+                        data['error'] = str(e)
+
+                    # form.save()
+                    # aviso = 'Servicio editado correctamente'
+                    # self.request.session['aviso'] = aviso
 
                 else:
-                    data['error'] = 'No se pudo actualizar el queue'
+                    data['error'] = 'No se pudo actualizar el servicio'
             else:
                 data['error']= 'No entro por ninguna opcion'
         except Exception as e:
@@ -819,11 +856,46 @@ class ServicioDeleteView(DeleteView):
                     password = servicio.servidor.contraseña
                     port = servicio.servidor.puertoapi
                     queue_name = servicio.nombre
-                    delete_queue = apimikrotik(host, username, password, port, data)
-                    delete_queue.eliminar_queue(queue_name)
-                    self.object.delete()
-                    aviso = 'Servicio eliminado correctamente'
-                    self.request.session['aviso'] = aviso
+                    tipo_servicio = servicio.tiposervicio
+                    servicio_eliminado = False
+                    usuarioppp = servicio.userpppoe
+
+                    delete_service = apimikrotik(host, username, password, port, data)
+                    try:
+                        if tipo_servicio == "pppoe":
+                            servicio_eliminado = delete_service.eliminar_secret_ppp(usuarioppp, data)
+
+                            if servicio_eliminado:
+                                self.object.delete()
+                                aviso = 'Servicio eliminado correctamente'
+                                self.request.session['aviso'] = aviso
+                            else:
+                                self.object.delete()
+                                aviso = 'Servicio eliminado de la db pero no de la mikrotik'
+                                self.request.session['aviso'] = aviso
+
+                        elif tipo_servicio == "estatica":
+                            servicio_eliminado = delete_service.eliminar_queue(queue_name)
+
+                            if servicio_eliminado:
+                                self.object.delete()
+                                aviso = 'Servicio eliminado correctamente'
+                                self.request.session['aviso'] = aviso
+
+                            else:
+                                self.object.delete()
+                                aviso = 'Servicio eliminado de la db pero no de la mikrotik'
+                                self.request.session['aviso'] = aviso
+
+
+                    except Exception as e:
+                        data['error'] = str(e)
+
+                    # delete_queue = apimikrotik(host, username, password, port, data)
+                    # delete_queue.eliminar_queue(queue_name)
+                    # self.object.delete()
+                    # aviso = 'Servicio eliminado correctamente'
+                    # self.request.session['aviso'] = aviso
         except Exception as e:
             data['error'] = str(e)    
         return JsonResponse(data)
@@ -836,6 +908,146 @@ class ServicioDeleteView(DeleteView):
         context["action"] = 'delete'
         context["content_jqueryConfirm"] = 'Estas seguro de eliminar este servicio'
         return context
+
+class DeshabilitarServicioView2(UpdateView):
+    template_name = 'mikrotik/serviciodesh.html'
+    model = Servicio
+    fields = ['estadoservicio']
+    success_url = reverse_lazy('serivcioslist')
+    
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        # self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        data = {}
+
+        try:
+            action = request.POST['action']
+            if action == 'desh':
+                form = self.get_form()
+                if form.is_valid():
+                    servicio = self.get_object()
+                    instance_mikro = servicio.servidor
+                    host = instance_mikro.ip
+                    username = instance_mikro.usuario
+                    password = instance_mikro.contraseña
+                    port = instance_mikro.puertoapi
+                    target_ip = servicio.ip_remote
+                    queue_name = servicio.nombre
+                    deshabilitar_S = apimikrotik(host, username, password, port, data)
+                    # deshabilitar_servicio(self, target_ip, target_ip)
+                    servicio_desh = False
+                    address_list = "Morosos"
+                    estado_servicio = servicio.estadoservicio
+                    print(estado_servicio)
+                    if estado_servicio == "Activo":
+                        servicio_desh=deshabilitar_S.deshabilitar_servicio(target_ip, queue_name, address_list)
+
+                        if servicio_desh:
+                            servicio.estadoservicio = "Inactivo"
+                            servicio.save()
+                            aviso = 'Servicio deshabilitado correctamente'
+                            self.request.session['aviso'] = aviso
+
+                        else:
+                            aviso = 'Error al deshabilitar el servicio'
+                            self.request.session['aviso'] = aviso
+
+                    elif estado_servicio == "Inactivo":
+                        servicio.estadoservicio = "Inactivo"
+                        servicio.save()
+                        aviso = 'El servicio ya se encuentra deshabilitado'
+                        self.request.session['aviso'] = aviso  
+                    
+                    else:
+                        aviso = 'El servicio no se encuentra en el estado activo o inactivo y no se deshabilito'
+                        self.request.session['aviso'] = aviso
+        
+        except Exception as e:
+            data['error'] = f'Error al deshabilitar el servicio: {str(e)}'
+
+        return JsonResponse(data)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'Deshabilitar contrato'
+        context["entity"] = 'Servicios'
+        context["list_url"] = reverse_lazy('serivcioslist')
+        context["action"] = 'desh'
+        context["content_jqueryConfirm"] = '¿Estas seguro de deshabilitar este serivicio?'
+        return context
+    
+class HabilitarServicioView(UpdateView):
+    template_name = 'mikrotik/serviciodesh.html'
+    model = Servicio
+    fields = ['estadoservicio']
+    success_url = reverse_lazy('serivcioslist')
+    
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        # self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        data = {}
+
+        try:
+            action = request.POST['action']
+            if action == 'hab':
+                form = self.get_form()
+                if form.is_valid():
+                    servicio = self.get_object()
+                    instance_mikro = servicio.servidor
+                    host = instance_mikro.ip
+                    username = instance_mikro.usuario
+                    password = instance_mikro.contraseña
+                    port = instance_mikro.puertoapi
+                    target_ip = servicio.ip_remote
+                    queue_name = servicio.nombre
+                    address_list = "Servicios_autorizados"
+                    habilitar_S = apimikrotik(host, username, password, port, data)
+                    # deshabilitar_servicio(self, target_ip, target_ip)
+                    servicio_hab = False
+                    estado_servicio = servicio.estadoservicio
+                    print(estado_servicio)
+                    if estado_servicio == "Inactivo":
+                        servicio_hab=habilitar_S.habilitar_servicio(target_ip, queue_name, address_list)
+
+                        if servicio_hab:
+                            servicio.estadoservicio = "Activo"
+                            servicio.save()
+                            aviso = 'Servicio habilitado correctamente'
+                            self.request.session['aviso'] = aviso
+
+                        else:
+                            aviso = 'Error al habilitar el servicio'
+                            self.request.session['aviso'] = aviso
+
+                    elif estado_servicio == "Activo":
+                        servicio.estadoservicio = "Activo"
+                        servicio.save()
+                        aviso = 'El servicio ya se encuentra habilitado'
+                        self.request.session['aviso'] = aviso  
+                    
+                    else:
+                        aviso = 'El servicio no se encuentra en el estado activo o inactivo y no se deshabilito'
+                        self.request.session['aviso'] = aviso
+        
+        except Exception as e:
+            data['error'] = f'Error al deshabilitar el servicio: {str(e)}'
+
+        return JsonResponse(data)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'Habilitar contrato'
+        context["entity"] = 'Servicios'
+        context["list_url"] = reverse_lazy('serivcioslist')
+        context["action"] = 'hab'
+        context["content_jqueryConfirm"] = '¿Estas seguro de habilitar este serivicio?'
+        return context    
 
 class DeshabilitarServicioView(DetailView):
     template_name = 'mikrotik/serviciodesh.html'
