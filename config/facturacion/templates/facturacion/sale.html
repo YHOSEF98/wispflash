@@ -1,0 +1,103 @@
+{% extends 'base/list.html' %}
+
+{% block head-list %}
+    <!-- Aquí podrías incluir más contenido si lo necesitas -->
+    <!-- hola desde SALE -->
+{% endblock head-list %}
+{% block content %}
+    <div class="card card-default">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fas fa-plus"></i>
+                {{ title }}
+            </h3>
+        </div>
+        {% if aviso  %}
+        <div id="aviso-container" class="alert alert-success alert-dismissible">
+            <h5><i class="icon fas fa-check"></i> {{aviso}}</h5>
+        </div>
+        
+        <script>
+            // Ocultar el aviso después de 2 segundos
+            setTimeout(function() {
+                document.getElementById("aviso-container").style.display = "none";
+            }, 2000);
+        </script>
+        {% endif %}
+        <div class="card-body">
+            <div class="row">        
+                <div class="col-lg-8">
+                    <div class="card card-secondary">
+                        <div class="card-header">
+                            <h3 class="card-title"> Detalle de factura <i class="fas fa-boxes"></i></h3>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Buscador de productos</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Ingrese una descripcion" autocomplete="off">
+                                    <span class="input-group-append">
+                                    <button type="button" class="btn btn-info btn-flat"><i class="fas fa-times"></i></button>
+                                    </span>
+                                </div>
+                                <hr>
+                                <table class="table table-bordered" id="data">
+                                    <thead>
+                                        <tr>
+                                            <th>Eliminar</th>
+                                            <th>Producto</th>
+                                            <th>PVP</th>
+                                            <th>Cantidad</th>
+                                            <th>subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card card-secondary">
+                        <div class="card-header">
+                            <h3 class="card-title"> Datos de factura <i class="fas fa-shopping-cart"></i></h3>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Fecha de la venta:</label>
+                                {{ form.date_joined }}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Cliente:</label>
+                                {{ form.cliente}}                                
+                            </div>
+                            <div class="form-group">
+                                <label>subtotal:</label>
+                                {{ form.subtotal}}                                
+                            </div>
+                            <div class="form-group">
+                                <label>IVA:</label>
+                                {{ form.iva}}                                
+                            </div>
+                            <div class="form-group">
+                                <label>Total:</label>
+                                {{ form.total}}                                
+                            </div>
+                            
+                        </div>
+                </div>
+            </div>
+        </div>   
+    </div>
+        <div class="card-footer">
+            <a href="{{create_url}}" class="btn btn-primary btn-flat">
+                <i class="fas fa-plus"></i> Nuevo registro
+            </a>
+        </div>
+    </div>
+{% endblock %}

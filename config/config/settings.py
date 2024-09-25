@@ -35,6 +35,8 @@ INSTALLED_APPS = [
     'mikrotik',
     'base',
     'clientes',
+    'facturacion',
+    'inventario',
     'login',
     'widget_tweaks',
     "django.contrib.admin",

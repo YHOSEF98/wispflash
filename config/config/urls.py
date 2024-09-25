@@ -25,6 +25,7 @@ urlpatterns = [
     path("login/", include('login.urls')),
     path("mikro/", include('mikrotik.urls')),
     path("cliente/", include('clientes.urls')),
+    path("ventas/", include('facturacion.urls')),
 ]
 
 

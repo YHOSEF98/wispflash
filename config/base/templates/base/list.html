@@ -7,6 +7,10 @@
     <script src="{% static 'base/lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
     <script src="{% static 'base/lib/datatables-1.10.20/plugins/responsive-2.2.3/js/dataTables.responsive.min.js' %}"></script>
     <script src="{% static 'base/lib/datatables-1.10.20/plugins/responsive-2.2.3/js/responsive.bootstrap4.min.js' %}"></script>
+    {% block head-list %}
+    <!-- Aquí podrías incluir más contenido si lo necesitas -->
+    {% endblock head-list %}
+
 {% endblock %}
 
 {% block content %}

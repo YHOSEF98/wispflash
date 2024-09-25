@@ -1018,6 +1018,7 @@ class HabilitarServicioView(UpdateView):
                         if servicio_hab:
                             servicio.estadoservicio = "Activo"
                             servicio.save()
+                            habilitar_S.close()
                             aviso = 'Servicio habilitado correctamente'
                             self.request.session['aviso'] = aviso
 

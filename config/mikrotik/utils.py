@@ -362,6 +362,107 @@ class apimikrotik:
 
         return self.data
 
+    def crear_regla_corte(self):
+        if self.api is None:
+            self.data['error'] = 'No hay conexión a la API de Mikrotik.'
+            print("no hay conexion a la mikrptik")
+            return
+        
+        try:
+            nat_resource = self.api.get_resource('/ip/firewall/nat')
+            # api = connection(host, username, password, port)
+            print("Conexión exitosa")
+            # Definir el nombre de la regla
+            rule_name = 'Morosos'
+            
+            # Obtener el recurso de reglas de firewall
+            # nat_resource = api.get_resource('/ip/firewall/nat')
+            
+            nat_params_tcp = {
+                    'chain': 'dstnat',  # La cadena de reenvío
+                    'src-address-list': rule_name,  # IP del cliente
+                    'action': 'redirect',  # Acción para bloquear el tráfico
+                    'comment': 'Manager - Suspension de ips (TCP)',  # Nombre de la regla
+                    'to-ports': '999',
+                    'protocol': 'tcp',
+                    'dst-port': '!8291,53'
+                }
+            nat_params_udp = {
+                    'chain': 'dstnat',  # La cadena de reenvío
+                    'src-address-list': rule_name,  # IP del cliente
+                    'action': 'redirect',  # Acción para bloquear el tráfico
+                    'comment': 'Manager - Suspension de ips (UDP)',  # Nombre de la regla
+                    'to-ports': '999',
+                    'protocol': 'udp',
+                    'dst-port': '!8291,53'
+                }
+            # Verificar si ya existe una regla con el mismo nombre y acción
+            nats = nat_resource.get()
+            existing_nat_tcp = None
+            existing_nat_udp = None
+            
+            for nat in nats:
+                if nat.get('src-address-list') == rule_name and nat.get('protocol') == 'tcp':
+                    existing_nat_tcp = nat
+                    print("regla tcp existente")
+                    break 
+            
+            if existing_nat_tcp:
+                # Eliminar la regla NAT existente
+                nat_resource.remove(id=existing_nat_tcp['id'])
+                print(f"Regla NAT eliminada")
+                nat_resource.add(**nat_params_tcp)
+                print("regla nat tcp creada")
+            else:
+                nat_resource.add(**nat_params_tcp)
+                print("regla nat creada tcp")
+
+            for nat in nats:
+                if nat.get('src-address-list') == rule_name and nat.get('protocol') == 'udp':
+                    existing_nat_udp = nat
+                    print("regla udp existente")
+                    break
+
+            if existing_nat_udp:
+                # Eliminar la regla NAT existente
+                nat_resource.remove(id=existing_nat_udp['id'])
+                print(f"Regla NAT eliminada")
+                nat_resource.add(**nat_params_udp)
+                print("regla nat udp creada")
+            else:
+                nat_resource.add(**nat_params_udp)
+                print("regla nat creada udp")
+
+            #CREAR REGLA FILTER
+            filter_resource = self.api.get_resource('/ip/firewall/filter')
+            filter_params = {
+                    'chain': 'forward',  # La cadena de reenvío
+                    'src-address-list': rule_name,  # Nombre de la lista
+                    'action': 'drop',  # Acción para bloquear el tráfico
+                    'comment': 'filtro de corte de servicio en mora',  # Nombre de la regla
+                }
+            # Verificar si ya existe una regla con el mismo nombre y acción
+            filters = filter_resource.get()
+            existing_filter = None
+            
+            for filter in filters:
+                if nat.get('src-address-list') == rule_name:
+                    existing_filter = filter
+                    print("regla tcp existente")
+                    break 
+            
+            if existing_filter:
+                # Eliminar la regla NAT existente
+                filter_resource.remove(id=existing_filter['id'])
+                print(f"Filtro NAT eliminado")
+                filter_resource.add(**filter_params)
+                print("filtro nap creado")
+            else:
+                filter_resource.add(**filter_params)
+                print("filtro nap creado")
+        except Exception as e:
+                self.data['error'] = str(e)
+
 def connection(host, username, password, port):
     api_pool = routeros_api.RouterOsApiPool(
         host=host,
@@ -381,7 +482,7 @@ def crear_regla_corte(host, username, password, port, data):
         api = connection(host, username, password, port)
         print("Conexión exitosa")
         # Definir el nombre de la regla
-        rule_name = 'Mora'
+        rule_name = 'Morosos'
         
         # Obtener el recurso de reglas de firewall
         nat_resource = api.get_resource('/ip/firewall/nat')
@@ -393,7 +494,7 @@ def crear_regla_corte(host, username, password, port, data):
                 'comment': 'Manager - Suspension de ips (TCP)',  # Nombre de la regla
                 'to-ports': '999',
                 'protocol': 'tcp',
-                'dst-port': '!8291'
+                'dst-port': '!8291,53'
             }
         nat_params_udp = {
                 'chain': 'dstnat',  # La cadena de reenvío
@@ -476,7 +577,7 @@ def crear_regla_acceso(host, username, password, port, data):
         api = connection(host, username, password, port)
         print("Conexión exitosa")
         # Definir el nombre de la regla
-        rule_name = 'Ips_autorizadas'
+        rule_name = 'Servicios_autorizados'
         
         # Obtener el recurso de reglas de firewall
         filter_resource = api.get_resource('/ip/firewall/filter')
