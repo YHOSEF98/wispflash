@@ -2,8 +2,25 @@ from django.db import models
 from django.forms import model_to_dict
 
 # Create your models here.
+class Categoria(models.Model):
+    nombre = models.CharField(max_length=50)
+    descripcion = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.nombre
+    
+    def toJSON(self):
+        item = model_to_dict(self)
+        return item
+
+    class Meta:
+        verbose_name = "Categoria"
+        verbose_name_plural = "Categorias"
+
+
 class Producto(models.Model):
     nombre = models.CharField(max_length=50)
+    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, blank=True, null=True)
     referecia = models.CharField(max_length=64, null=True, blank=True)
     descripcion = models.TextField()
     preciocompra = models.DecimalField(max_digits=10, decimal_places=2)
@@ -13,8 +30,10 @@ class Producto(models.Model):
     def __str__(self):
         return f'{self.nombre} - {self.precioventa}'
     
-    def tojson(self):
+    def toJSON(self):
         item = model_to_dict(self)
+        item['categoria'] = self.categoria.toJSON()
+        item['precioventa'] = format(self.precioventa, '.2F')
         return item
 
     class Meta:

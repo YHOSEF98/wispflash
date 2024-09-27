@@ -1,7 +1,24 @@
 {% extends 'base/list.html' %}
+{% load static %}
 
 {% block head-list %}
-    <!-- Aquí podrías incluir más contenido si lo necesitas -->
+
+    <!-- jquery ui -->
+    <link href="{% static 'base/lib/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'base/lib/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+    <!-- Selec 2 -->
+    <link href="{% static 'base/lib/select2-4.0.13/css/select2.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'base/lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'base/lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <script src="{% static 'base/lib/select2-4.0.13/js/i18n/es.js' %}"></script>
+    <script src="{% static 'facturacion/js/formfact.js' %}"></script>
+    <!-- lib moment and tempus -->
+    <script src="{% static 'base/lib/moment-2.25.3/moment-with-locales.js' %}"></script>
+    <script src="{% static 'base/lib/tempusdominus-bootstrap-4.5.37.0/js/tempusdominus-bootstrap.js' %}"></script>
+    <link href="{% static 'base/lib/tempusdominus-bootstrap-4.5.37.0/css/tempusdominus-bootstrap.css' %}" rel="stylesheet"/>
+    <!-- touchpin -->
+    <link href="{% static 'base/lib/bootstrap-touchspin-4.2.5/css/jquery.bootstrap-touchspin.css' %}" rel="stylesheet"/>
+    <script src="{% static 'base/lib/bootstrap-touchspin-4.2.5/js/jquery.bootstrap-touchspin.js' %}"></script>
     <!-- hola desde SALE -->
 {% endblock head-list %}
 {% block content %}
@@ -22,7 +39,7 @@
             setTimeout(function() {
                 document.getElementById("aviso-container").style.display = "none";
             }, 2000);
-        </script>
+        </scrip>
         {% endif %}
         <div class="card-body">
             <div class="row">        
@@ -36,20 +53,20 @@
                             <div class="form-group">
                                 <label>Buscador de productos</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="Ingrese una descripcion" autocomplete="off">
+                                    <input type="text" class="form-control" name="search_productos" placeholder="Ingrese una descripcion" autocomplete="off">
                                     <span class="input-group-append">
                                     <button type="button" class="btn btn-info btn-flat"><i class="fas fa-times"></i></button>
                                     </span>
                                 </div>
                                 <hr>
-                                <table class="table table-bordered" id="data">
+                                <table class="table table-bordered" id="tblProductos">
                                     <thead>
                                         <tr>
                                             <th>Eliminar</th>
                                             <th>Producto</th>
                                             <th>PVP</th>
                                             <th>Cantidad</th>
-                                            <th>subtotal</th>
+                                            <th>Subtotal</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -85,6 +102,10 @@
                                 {{ form.iva}}                                
                             </div>
                             <div class="form-group">
+                                <label>IVA Calculado:</label>
+                                <input type="text" class="form-control" readonly="true" name="ivacalc" value="0.00">                               
+                            </div>
+                            <div class="form-group">
                                 <label>Total:</label>
                                 {{ form.total}}                                
                             </div>
@@ -96,7 +117,10 @@
     </div>
         <div class="card-footer">
             <a href="{{create_url}}" class="btn btn-primary btn-flat">
-                <i class="fas fa-plus"></i> Nuevo registro
+                <i class="fas fa-save"></i> Nuevo registro
+            </a>
+            <a href="" class="btn btn-danger btn-flat">
+                <i class="fas fa-times"></i> cancelar
             </a>
         </div>
     </div>

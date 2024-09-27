@@ -6,6 +6,8 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, D
 from django.utils.decorators import method_decorator
 from .models import Sale
 from .forms import *
+from django.views.decorators.csrf import csrf_exempt
+from inventario.models import Producto
 
 # Create your views here.
 class SaleCreateView(CreateView):
@@ -14,7 +16,8 @@ class SaleCreateView(CreateView):
     template_name = 'facturacion/sale.html'
     success_url = reverse_lazy('mikrolist')
 
-    @method_decorator(login_required)
+    # @method_decorator(login_required)
+    @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
@@ -22,22 +25,26 @@ class SaleCreateView(CreateView):
         data = {}
         try:
             action = request.POST['action']
-            if action == 'add':
-                form = self.get_form()
-                data = form.save()
-                aviso = 'Grupo de corte creado correctamente'
-                request.session['aviso'] = aviso
+            if action == 'search_productos':
+                data = []
+                productos = Producto.objects.filter(nombre__icontains=request.POST['term'])[0:10]
+                for i in productos:
+                    item = i.toJSON()
+                    item['value'] = i.nombre
+                    data.append(item)
+                # aviso = 'Grupo de corte creado correctamente'
+                # request.session['aviso'] = aviso
             else:
                 data['error']= 'No entro por ninguna opcion'
         except Exception as e:
             data['error'] = str(e)
-        return JsonResponse(data)
+        return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["title"] = 'Creacion de una venta'
+        context["title"] = 'Creacion de una factura'
         context["entity"] = 'Ventas'
         context["list_url"] = reverse_lazy('mikrolist')
         context["action"] = 'add'
-        context["content_jqueryConfirm"] = '¿Estas seguro de Crear esta venta?'
+        context["content_jqueryConfirm"] = '¿Estas seguro de Crear esta factura?'
         return context
