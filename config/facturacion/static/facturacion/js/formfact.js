@@ -11,6 +11,7 @@ var vents = {
         var subtotal = 0.00;
         var iva = $('input[name="iva"]').val();
         $.each(this.items.products, function(pos, dict){
+            dict.pos = pos;
             dict.subtotal = dict.cantidad * parseFloat(dict.precioventa);
             subtotal += dict.subtotal;
         });
@@ -65,7 +66,7 @@ var vents = {
                     class: 'text-center',
                     orderable: false,
                     render: function (data, type, row) {
-                        return '<input type="text" name="cantidad" class="form-control form-control-sm" autocomplete="off" value="'+row.cantidad+'">';
+                        return '<input type="text" name="cantidad" class="form-control form-control-sm input-sm" autocomplete="off" value="'+row.cantidad+'">';
                     }              
                 },
                 {
@@ -76,17 +77,33 @@ var vents = {
                         return '$'+parseFloat(data).toFixed(2);
                     }              
                 }
-            ]
+            ],
+            rowCallback( row, data, displayNum, displayIndex, dataIndex){
+                console.log(data)
+                $(row).find('input[name="cantidad"]').TouchSpin({
+                    min: 0,
+                    max: 999999999,
+                    step: 1,
+                })
+            }
         });
     },
 };
 
 
 $(function(){
+    // evento de cantidad
+    $('#tblProductos').on('change keyup', 'input[name="cantidad"]', function () {
+        console.clear()
+        var cant = parseInt($(this).val());
+        console.log(cant)
+    });
+    // evento buscador de productos
     $('.select2').select2({
         theme: "bootstrap4",
         lenguaje: "es",
     });
+    //uso de calendario
     $('#date_joined').datetimepicker({
         format: 'DD-MM-YYYY',
         date: moment().format('DD-MM-YYYY'),
@@ -125,13 +142,12 @@ $(function(){
         minLength: 1,
         select: function (event, ui) {
             event.preventDefault();
-            console.clear();
             ui.item.cantidad = 1;
             ui.item.subtotal = 0.00;
-            console.log(vents.items);
             vents.add(ui.item)
             $(this).val('');
         }
     });
+    
     
 });
