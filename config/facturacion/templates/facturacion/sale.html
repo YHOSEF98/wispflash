@@ -22,6 +22,8 @@
     <!-- hola desde SALE -->
 {% endblock head-list %}
 {% block content %}
+<form method="post">
+    {% csrf_token %}
     <div class="card card-default">
         <div class="card-header">
             <h3 class="card-title">
@@ -29,19 +31,8 @@
                 {{ title }}
             </h3>
         </div>
-        {% if aviso  %}
-        <div id="aviso-container" class="alert alert-success alert-dismissible">
-            <h5><i class="icon fas fa-check"></i> {{aviso}}</h5>
-        </div>
-        
-        <script>
-            // Ocultar el aviso después de 2 segundos
-            setTimeout(function() {
-                document.getElementById("aviso-container").style.display = "none";
-            }, 2000);
-        </scrip>
-        {% endif %}
         <div class="card-body">
+            <input type="hidden" name="action" value="{{ action }}"/>
             <div class="row">        
                 <div class="col-lg-8">
                     <div class="card card-secondary">
@@ -55,9 +46,14 @@
                                 <div class="input-group">
                                     <input type="text" class="form-control" name="search_productos" placeholder="Ingrese una descripcion" autocomplete="off">
                                     <span class="input-group-append">
-                                    <button type="button" class="btn btn-info btn-flat"><i class="fas fa-times"></i></button>
+                                    <button type="button" class="btn btn-info btn-flat"><i class="fas fa-times"></i>
+                                    </button>
                                     </span>
                                 </div>
+                                <hr>
+                                <button type="button" class="btn btn-danger btn-flat btnRemoveAll">
+                                    <i class="fas fa-trash"></i> Eliminar todos los items
+                                </button>
                                 <hr>
                                 <table class="table table-bordered" id="tblProductos">
                                     <thead>
@@ -111,17 +107,20 @@
                             </div>
                             
                         </div>
+                    </div>
                 </div>
             </div>
         </div>   
     </div>
         <div class="card-footer">
-            <a href="{{create_url}}" class="btn btn-primary btn-flat">
-                <i class="fas fa-save"></i> Nuevo registro
-            </a>
-            <a href="" class="btn btn-danger btn-flat">
+            <button type="submit" class="btn btn-primary btn-flat">
+                <i class="fas fa-save"></i> Guardar registro
+            </button>
+            <a href="{{ list_url }}" class="btn btn-danger btn-flat">
                 <i class="fas fa-times"></i> cancelar
             </a>
         </div>
     </div>
+
+</form>
 {% endblock %}

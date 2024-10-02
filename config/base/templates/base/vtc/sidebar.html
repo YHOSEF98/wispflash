@@ -76,6 +76,35 @@
                       </li>
                     </ul>
                   </li>
+                  <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                      <i class="fas fa-file-invoice"></i>
+                      <p>
+                         Facturacion
+                        <i class="fas fa-angle-left right"></i>
+                      </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                      <li class="nav-item">
+                        <a href="{% url 'sale_create' %}"  class="nav-link">
+                          <i class="fas fa-file-invoice-dollar"></i>
+                          <p> Crear factura estandar</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="{% url 'sale_list' %}" class="nav-link">
+                          <i class="fas fa-clipboard-list"></i>
+                          <p> Listado de facturas</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="{% url 'zonaslist' %}" class="nav-link">
+                          <i class="fas fa-dice-d20"></i>
+                          <p> Zonas</p>
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
                   <li class="nav-item">
                     <a  class="nav-link">
                       <i class="nav-icon fas fa-th"></i>

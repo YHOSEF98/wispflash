@@ -1,0 +1,42 @@
+{% extends 'base/list.html' %}
+{% load static %}
+{% block head-list %}
+    
+{% endblock head-list %}
+
+{% block columns %}
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Cliente</th>
+        <th scope="col">Subtotal</th>
+        <th scope="col">IVA</th>
+        <th scope="col">Total</th>
+        <th scope="col">Fecha</th>
+        <th scope="col">Acciones</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+    {% for s in object_list %}
+        <tr>
+            <td> {{s.id}}</td>
+            <td> {{s.cliente}}</td>
+            <td> {{s.subtotal}}</td>
+            <td> {{s.iva}}</td>
+            <td> {{s.total}}</td>
+            <td> {{s.date_joined}}</td>
+            <td>
+                <a href="" type="button" class="btn btn-success btn-xs btn-flat">
+                    <i class="far fa-eye"></i>
+                </a>
+                <a href="" type="button" class="btn btn-warning btn-xs btn-flat">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="" type="button" class="btn btn-danger btn-xs btn-flat">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    
+{% endblock %}

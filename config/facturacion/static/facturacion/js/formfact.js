@@ -1,3 +1,4 @@
+var tblProducts;
 var vents = {
     items : {
         cliente: '',
@@ -16,7 +17,7 @@ var vents = {
             subtotal += dict.subtotal;
         });
         this.items.subtotal = subtotal;
-        this.items.iva = this.items.subtotal * iva
+        this.items.iva = (this.items.subtotal * iva)/100
         this.items.total = this.items.subtotal + this.items.iva
 
         $('input[name="subtotal"]').val(this.items.subtotal.toFixed(2));
@@ -30,7 +31,7 @@ var vents = {
     list: function(){
         this.calculate_invoice()
 
-        $('#tblProductos').DataTable({
+        tblProducts=$('#tblProductos').DataTable({
             responsive: true,
             autoWidth: false,
             destroy: true,
@@ -49,7 +50,7 @@ var vents = {
                     class: 'text-center',
                     orderable: false,
                     render: function (data, type, row) {
-                        return '<a rel="remove" type="button" class="btn btn-danger btn-xs btn-flat"><i class="fas fa-trash-alt"></i></a>';
+                        return '<a rel="remove" type="button" class="btn btn-danger btn-xs btn-flat" style="color: white;"><i class="fas fa-trash-alt"></i></a>';
                     }
                     
                 },
@@ -79,7 +80,6 @@ var vents = {
                 }
             ],
             rowCallback( row, data, displayNum, displayIndex, dataIndex){
-                console.log(data)
                 $(row).find('input[name="cantidad"]').TouchSpin({
                     min: 0,
                     max: 999999999,
@@ -92,11 +92,31 @@ var vents = {
 
 
 $(function(){
+    //boton eliminar todo
+    $('.btnRemoveAll').on('click',function(){
+        if(vents.items.products.length == 0) return false;
+        alert_action("Notificacion", "¿Estas seguro de eliminar todos los item de la factura?", function(){
+            vents.items.products = [];
+            vents.list();
+        });
+    });
     // evento de cantidad
-    $('#tblProductos').on('change keyup', 'input[name="cantidad"]', function () {
-        console.clear()
+    $('#tblProductos tbody')
+    .on('click', 'a[rel="remove"]', function(){
+        var tr = tblProducts.cell($(this).closest('td, li')).index();
+        alert_action("Notificacion", "¿Estas seguro de eliminar el item de la factura?", function(){
+            vents.items.products.splice(tr.row, 1);
+            vents.list();
+        });
+    })
+    .on('change keyup', 'input[name="cantidad"]', function () {
+        //console.clear()
         var cant = parseInt($(this).val());
-        console.log(cant)
+        var tr = tblProducts.cell($(this).closest('td, li')).index();
+        var data = tblProducts.row(tr).node();
+        vents.items.products[tr.row].cantidad = cant;
+        vents.calculate_invoice();
+        $('td:eq(4)', tblProducts.row(tr.row).node()).html('$' + vents.items.products[tr.row].subtotal.toFixed(2));
     });
     // evento buscador de productos
     $('.select2').select2({
@@ -105,21 +125,21 @@ $(function(){
     });
     //uso de calendario
     $('#date_joined').datetimepicker({
-        format: 'DD-MM-YYYY',
-        date: moment().format('DD-MM-YYYY'),
+        format: 'YYYY-MM-DD',
+        date: moment().format('YYYY-MM-DD'),
         locale: 'es',
     });
     $("input[name='iva']").TouchSpin({
         min: 0,
         max: 100,
-        step: 0.01,
+        step: 1,
         decimals: 2,
         boostat: 5,
         maxboostedstep: 10,
         postfix: '%'
     }).on('change', function(){
         vents.calculate_invoice();
-    }).val(0.19);
+    }).val(19);
     //search productos
     $("input[name='search_productos']").autocomplete({
         source: function (request, response){
@@ -148,6 +168,21 @@ $(function(){
             $(this).val('');
         }
     });
-    
+    // evento de envio de la factura
+    $('form').on('submit', function(e){
+        e.preventDefault();
+
+        vents.items.date_joined = $('input[name="date_joined"]').val();
+        vents.items.cliente = $('select[name="cliente"]').val();
+        console.log(vents.items.cliente)
+
+        var parameters = new FormData(this);
+        parameters.append('action',$('input[name="action"]').val());
+        parameters.append('vents',  JSON.stringify(vents.items));
+
+        var content = '¿Estas seguro de Crear esta factura?';
+        var urlpathlist = "/ventas/facturas/list";
+        envio_withajax(parameters,content, urlpathlist);
+    });
     
 });

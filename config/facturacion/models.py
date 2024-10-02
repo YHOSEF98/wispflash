@@ -2,6 +2,7 @@ from django.db import models
 from clientes.models import Cliente
 from inventario.models import Producto
 from datetime import datetime
+from django.forms import model_to_dict
 
 
 # Create your models here.
@@ -16,6 +17,10 @@ class Sale(models.Model):
 
     def __str__(self):
         return self.cliente.nombre
+    
+    def toJSON(self):
+        item = model_to_dict(self)
+        return item
     
 class DetSale(models.Model):
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE)
