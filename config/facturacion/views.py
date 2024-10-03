@@ -107,3 +107,37 @@ class SaleListView(ListView):
         context["action"] = 'searchdata'
         return context
     
+class SaleDeleteView(DeleteView):
+    model = Sale
+    template_name = 'mikrotik/deletemikrotik.html'
+    success_url = reverse_lazy('sale_list')
+
+    # @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'delete':
+                form = self.get_form()
+                if form.is_valid():
+                    servicio = self.get_object()
+                    servicio.delete()
+        except Exception as e:
+            data['error'] = str(e)    
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'Eliminacion de un servicio'
+        context["entity"] = 'Grupo de corte'
+        context["list_url"] = reverse_lazy('serivcioslist')
+        context["action"] = 'delete'
+        context["content_jqueryConfirm"] = 'Estas seguro de eliminar este servicio'
+        return context
+    
+    
