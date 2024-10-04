@@ -20,6 +20,10 @@ class Sale(models.Model):
     
     def toJSON(self):
         item = model_to_dict(self)
+        item['date_joined'] = self.date_joined.strftime('%Y-%m-%d')
+        item['subtotal'] = self.subtotal
+        item['iva'] = self.iva
+        item['total'] = self.total
         return item
     
 class DetSale(models.Model):
@@ -28,3 +32,13 @@ class DetSale(models.Model):
     precio = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     cantidad = models.IntegerField(default=0)
     subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
+
+    def toJSON(self):
+        item = model_to_dict(self, exclude=['sale'])
+        item['producto'] = self.producto.nombre
+        item['precio'] = self.precio
+        item['cantidad'] = self.cantidad
+        item['subtotal'] = self.subtotal
+        return item
+    
+

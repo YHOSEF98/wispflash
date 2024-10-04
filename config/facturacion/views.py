@@ -76,7 +76,8 @@ class SaleListView(ListView):
     model = Sale
     template_name = 'facturacion/listfacturas.html'
 
-    @method_decorator(login_required)
+    # @method_decorator(login_required)
+    @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
     
@@ -140,4 +141,40 @@ class SaleDeleteView(DeleteView):
         context["content_jqueryConfirm"] = 'Estas seguro de eliminar este servicio'
         return context
     
+class SaledetailView(DetailView):
+    model = Sale
+    template_name = 'facturacion/detailfactura.html'
     
+    
+    # @method_decorator(login_required)
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            sale_id = self.get_object().id
+            if action == 'detail_products':
+                data = []
+                for i in DetSale.objects.filter(sale_id=sale_id):
+                    data.append(i.toJSON())
+            else:
+                data['error'] = 'Ha ocurrido un error'
+
+        except Exception as e:
+            data['error'] = str(e)
+
+        return JsonResponse(data, safe=False)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'Detalles de la factura'
+        context["entity"] = 'Detalles Factura'
+        context["list_url"] = reverse_lazy('sale_list')
+        context["action"] = 'detail'
+        context['producto'] = DetSale.objects.filter(sale_id=self.object.id).values(
+        'producto', 'precio', 'cantidad', 'subtotal')
+        context["content_jqueryConfirm"] = 'Estas seguro de eliminar el Servidor Mikrotik'
+        return context

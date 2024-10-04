@@ -1,0 +1,92 @@
+{% extends 'base/list.html' %}
+{% load static %}
+
+{% block head-list %}
+    <script src="{% static 'facturacion/js/listsale.js' %}"></script>
+{% endblock head-list %}
+{% block content %}
+    <div class="card card-default">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fas fa-plus"></i>
+                {{ title }}
+            </h3>
+        </div>
+        <div class="card-body">
+            <input type="hidden" name="action" value="{{ action }}"/>
+            <div class="row">        
+                <div class="col-lg-8">
+                    <div class="card card-secondary">
+                        <div class="card-header">
+                            <h3 class="card-title"> Detalle de factura <i class="fas fa-boxes"></i></h3>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="form-group">
+                                <table class="table table-bordered" id="data">
+                                    <thead>
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>PVP</th>
+                                            <th>Cantidad</th>
+                                            <th>Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for producto in productos %}
+                                        <tr>
+                                            <td>{{ producto.nombre }}</td>
+                                            <td>{{ producto.precio }}</td>
+                                            <td>{{ producto.cantidad }}</td>
+                                            <td>{{ producto.subtotal }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card card-secondary">
+                        <div class="card-header">
+                            <h3 class="card-title"> Datos de factura <i class="fas fa-shopping-cart"></i></h3>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="form-group">
+                                <div><label>Fecha de la venta:</label></div>
+                                <div>{{ sale.date_joined }}</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div><label>Cliente:</label></div>
+                                <div>{{ sale.cliente.nombre }}</div>                            
+                            </div>
+                            <div class="form-group">
+                                <div><label>Subtotal:</label></div>
+                                <div>{{ sale.subtotal }}</div>                                 
+                            </div>
+                            <div class="form-group">                                
+                                <div><label>IVA:</label></div>
+                                <div>{{ sale.iva }}</div>                                
+                            </div>
+                            <div class="form-group">
+                                <div><label>Total:</label></div>
+                                <div>{{ sale.total}}</div>                                
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+    </div>
+        <div class="card-footer">
+            <a href="{{ list_url }}" class="btn btn-primary btn-flat">
+                <i class="fas fa-times"></i> Volver
+            </a>
+        </div>
+    </div>
+{% endblock %}
