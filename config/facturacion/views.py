@@ -110,7 +110,7 @@ class SaleListView(ListView):
     
 class SaleDeleteView(DeleteView):
     model = Sale
-    template_name = 'mikrotik/deletemikrotik.html'
+    template_name = 'facturacion/deletesale.html'
     success_url = reverse_lazy('sale_list')
 
     # @method_decorator(csrf_exempt)
@@ -126,19 +126,19 @@ class SaleDeleteView(DeleteView):
             if action == 'delete':
                 form = self.get_form()
                 if form.is_valid():
-                    servicio = self.get_object()
-                    servicio.delete()
+                    sale = self.get_object()
+                    sale.delete()
         except Exception as e:
             data['error'] = str(e)    
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["title"] = 'Eliminacion de un servicio'
-        context["entity"] = 'Grupo de corte'
-        context["list_url"] = reverse_lazy('serivcioslist')
+        context["title"] = 'Eliminacion de esta factura'
+        context["entity"] = 'ventas'
+        context["list_url"] = reverse_lazy('sale_list')
         context["action"] = 'delete'
-        context["content_jqueryConfirm"] = 'Estas seguro de eliminar este servicio'
+        context["content_jqueryConfirm"] = 'Estas seguro de eliminar esta factura'
         return context
     
 class SaledetailView(DetailView):
@@ -173,8 +173,8 @@ class SaledetailView(DetailView):
         context["title"] = 'Detalles de la factura'
         context["entity"] = 'Detalles Factura'
         context["list_url"] = reverse_lazy('sale_list')
-        context["action"] = 'detail'
-        context['producto'] = DetSale.objects.filter(sale_id=self.object.id).values(
-        'producto', 'precio', 'cantidad', 'subtotal')
+        context["action"] = 'detail_products'
         context["content_jqueryConfirm"] = 'Estas seguro de eliminar el Servidor Mikrotik'
         return context
+    
+

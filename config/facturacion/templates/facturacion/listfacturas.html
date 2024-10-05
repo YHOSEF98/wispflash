@@ -43,13 +43,13 @@
             <td> {{s.total}}</td>
             <td> {{s.date_joined}}</td>
             <td>
-                <a rel="details" href="" type="button" class="btn btn-success btn-xs btn-flat">
+                <a rel="details" href="{% url 'sale_detail' s.id %}" type="button" class="btn btn-success btn-xs btn-flat">
                     <i class="far fa-eye"></i>
                 </a>
                 <a href="" type="button" class="btn btn-warning btn-xs btn-flat">
                     <i class="fas fa-edit"></i>
                 </a>
-                <a rel="remove" href="" type="button" class="btn btn-danger btn-xs btn-flat">
+                <a  href="{% url 'sale_delete' s.id %}" type="button" class="btn btn-danger btn-xs btn-flat">
                     <i class="fas fa-trash-alt"></i>
                 </a>
             </td>

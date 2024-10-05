@@ -28,17 +28,17 @@ class Sale(models.Model):
     
 class DetSale(models.Model):
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE)
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    producto = models.ForeignKey(Producto, on_delete=models.SET_NULL, null=True)
     precio = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     cantidad = models.IntegerField(default=0)
     subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
 
     def toJSON(self):
         item = model_to_dict(self, exclude=['sale'])
-        item['producto'] = self.producto.nombre
-        item['precio'] = self.precio
-        item['cantidad'] = self.cantidad
-        item['subtotal'] = self.subtotal
+        item['producto'] = self.producto.toJSON()
+        item['precio'] = format(self.precio, '.2f')
+        item['cantidad'] = format(self.cantidad, '.2f')
+        item['subtotal'] = format(self.subtotal, '.2f')
         return item
     
 
