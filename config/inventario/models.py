@@ -33,6 +33,7 @@ class Producto(models.Model):
     def toJSON(self):
         item = model_to_dict(self)
         item['categoria'] = self.categoria.toJSON()
+        item['preciocompra'] = format(self.preciocompra, '.2f')
         item['precioventa'] = format(self.precioventa, '.2F')
         return item
 

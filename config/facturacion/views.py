@@ -177,4 +177,79 @@ class SaledetailView(DetailView):
         context["content_jqueryConfirm"] = 'Estas seguro de eliminar el Servidor Mikrotik'
         return context
     
+class SaleUpdateView(UpdateView):
+    model = Sale
+    form_class = SaleForm
+    template_name = 'facturacion/sale.html'
+    success_url = reverse_lazy('sale_list')
+
+    # @method_decorator(login_required)
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_details_products(self):
+        data = []
+        try:
+            for i in DetSale.objects.filter(sale_id=self.get_object().id):
+                item = i.producto.toJSON()
+                item['cantidad'] = i.cantidad
+                item['precio'] = float(i.precio)
+                data.append(item)
+        except:
+            pass
+
+        return data
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'search_productos':
+                data = []
+                productos = Producto.objects.filter(nombre__icontains=request.POST['term'])[0:10]
+                for i in productos:
+                    item = i.toJSON()
+                    item['value'] = i.nombre
+                    data.append(item)
+                # aviso = 'Grupo de corte creado correctamente'
+                # request.session['aviso'] = aviso
+            elif action == 'edit':
+                with transaction.atomic():
+                    vents = json.loads(request.POST['vents'])
+                    sale = self.get_object()
+                    sale.date_joined = vents['date_joined']
+                    sale.cliente_id = vents['cliente']
+                    sale.subtotal = float(vents['subtotal'])
+                    sale.iva = float(vents['iva'])
+                    sale.total = float(vents['total'])
+                    sale.save()
+                    sale.detsale_set.all().delete()
+
+                    for i in vents['products']:
+                        det = DetSale()
+                        det.sale_id = sale.id
+                        det.producto_id = i['id']
+                        det.precio = float(i['precioventa'])
+                        det.cantidad = int(i['cantidad'])
+                        det.subtotal = float(i['subtotal'])
+                        det.save()
+
+            else:
+                data['error']= 'No entro por ninguna opcion'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'Edicion de una factura'
+        context["det"] = self.get_details_products()
+        context["entity"] = 'Ventas'
+        context["list_url"] = self.success_url
+        context["action"] = 'edit'
+        context["content_jqueryConfirm"] = '¿Estas seguro de Crear esta factura?'
+        return context
+ 
+
 
