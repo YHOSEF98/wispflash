@@ -19,7 +19,7 @@ class SaleCreateView(CreateView):
     template_name = 'facturacion/sale.html'
     success_url = reverse_lazy('sale_list')
 
-    # @method_decorator(login_required)
+    @method_decorator(login_required)
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
@@ -76,7 +76,7 @@ class SaleListView(ListView):
     model = Sale
     template_name = 'facturacion/listfacturas.html'
 
-    # @method_decorator(login_required)
+    @method_decorator(login_required)
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)

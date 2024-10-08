@@ -2,6 +2,7 @@ from django.db import models
 from .choices import *
 from clientes.models import Cliente, Zona
 from django.forms import model_to_dict
+from config.settings import MEDIA_URL, STATIC_URL
 
 # Create your models here.
 class Mikrotik(models.Model):
@@ -131,4 +132,84 @@ class Servicio(models.Model):
     def toJSON(self):
         item = model_to_dict(self)
         return item
+
+class Nodo(models.Model):
+    nombre = models.CharField(max_length=50)
+    mikrotik = models.ForeignKey(Mikrotik, on_delete=models.CASCADE)
+    zona = models.ForeignKey(Zona, on_delete=models.DO_NOTHING, null=True, blank=True)
+    coordenadas = models.CharField(max_length=50, null=True, blank=True)
+    publicas_recibidas = models.CharField(max_length=150, null=True, blank=True)
+    recepcion = models.CharField(choices=recepcio_s, max_length=20, default='FO')
+    equipo_proveedor = models.CharField(max_length=50, null=True, blank=True)
+    imagen_equipo_proveedor = models.ImageField(upload_to='Nodo/%Y/%m/%d', null=True, blank=True)
+    equipo_propio = models.CharField(max_length=50, null=True, blank=True)
+    imagen_equpo_propio = models.ImageField(upload_to='Nodo/%Y/%m/%d', null=True, blank=True)
+    descripcion = models.TextField(null=True, blank=True)
+
+    class Meta:
+            verbose_name = 'Nodo'
+            verbose_name_plural = 'Nodos'
+
+    def __str__(self):
+            return f'{self.nombre}'
+    
+    def get_imagen_equipo_proveedor(self):
+        if self.imagen_equipo_proveedor:
+            return '{}{}'.format(MEDIA_URL, self.image)
+        return '{}{}'.format(STATIC_URL, 'img/empty.png')
+        
+    def get_imagen_equipo_propio(self):
+        if self.imagen_equpo_propio:
+            return '{}{}'.format(MEDIA_URL, self.image)
+        return '{}{}'.format(STATIC_URL, 'img/empty.png')
+        
+    def toJSON(self):
+            item = model_to_dict(self)
+            return item
+     
+class Torre(models.Model):
+    nombre = models.CharField(max_length=50)
+    nodo = models.ForeignKey(Nodo, on_delete=models.CASCADE)
+    estacion_ip = models.CharField(max_length=15)
+    zona = models.ForeignKey(Zona, on_delete=models.DO_NOTHING, null=True, blank=True)
+    coordenadas = models.CharField(max_length=50, null=True, blank=True)
+    descripcion = models.TextField(null=True, blank=True)
+
+    class Meta:
+         verbose_name = 'Torres'
+         verbose_name_plural = 'Torres'
+
+    def __str__(self):
+         return f'{self.nombre}-{self.nodo}'
+    
+    def toJSON(self):
+        item = model_to_dict(self)
+        return item
+    
+class Accesspoint(models.Model):
+     nombre = models.CharField(max_length=50)
+     ip = models.CharField(max_length=15)
+     image = models.ImageField(upload_to='accesspoint/%Y/%m/%d', null=True, blank=True)
+     ssid = models.CharField(max_length=50)
+     seguridad = models.CharField(max_length=50)
+     nodo = models.ForeignKey(Nodo, on_delete=models.DO_NOTHING, null=True, blank=True)
+     torre =  models.ForeignKey(Torre, on_delete=models.DO_NOTHING, null=True, blank=True)
+     descripcion = models.TextField(null=True, blank=True)
+
+     class Meta:
+         verbose_name = 'Acess Point'
+         verbose_name_plural = 'Acess Points'
+
+     def __str__(self):
+         return f'{self.nombre}'
+    
+     def get_image(self):
+         if self.image:
+             return '{}{}'.format(MEDIA_URL, self.image)
+         return '{}{}'.format(STATIC_URL, 'img/empty.png')
+    
+     def toJSON(self):
+        item = model_to_dict(self)
+        return item
+
 

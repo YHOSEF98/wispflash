@@ -1,4 +1,6 @@
 var tblProducts;
+// var csrftoken = $('input[name="csrfmiddlewaretoken"]').val();
+
 var vents = {
     items : {
         cliente: '',
@@ -168,6 +170,7 @@ $(function(){
             $(this).val('');
         }
     });
+
     // evento de envio de la factura
     $('form').on('submit', function(e){
         e.preventDefault();
@@ -186,3 +189,6 @@ $(function(){
     });
     
 });
+
+
+

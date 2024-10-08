@@ -20,3 +20,8 @@ no_yes_requiered = [
     ('required','required'),
     ('default','default')
 ]
+
+recepcio_s = [
+    ('FO','Fibra optica'),
+    ('I','Inhalambrico')
+]

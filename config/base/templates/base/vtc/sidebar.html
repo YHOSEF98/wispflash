@@ -97,12 +97,6 @@
                           <p> Listado de facturas</p>
                         </a>
                       </li>
-                      <li class="nav-item">
-                        <a href="{% url 'zonaslist' %}" class="nav-link">
-                          <i class="fas fa-dice-d20"></i>
-                          <p> Zonas</p>
-                        </a>
-                      </li>
                     </ul>
                   </li>
                   <li class="nav-item">
@@ -139,6 +133,35 @@
                         <a href="{% url 'grupocortelist' %}" class="nav-link">
                           <i class="fas fa-grip-horizontal"></i>
                           <p> Grupos de corte</p>
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                      <i class="fas fa-map-marked-alt"></i>
+                      <p>
+                        Zonas
+                        <i class="fas fa-angle-left right"></i>
+                      </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                      <li class="nav-item">
+                        <a href=""  class="nav-link">
+                          <i class="fas fa-network-wired"></i>
+                          <p> Nodos</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="" class="nav-link">
+                          <i class="far fa-paper-plane"></i>
+                          <p> Access Point</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="{% url 'zonaslist' %}" class="nav-link">
+                          <i class="fas fa-map-marker-alt"></i>
+                          <p> Zonas</p>
                         </a>
                       </li>
                     </ul>
