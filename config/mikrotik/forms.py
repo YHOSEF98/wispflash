@@ -205,3 +205,48 @@ class TestForm(Form):
     servicios = ModelChoiceField(queryset=Servicio.objects.none(), widget=Select(attrs={
         'class':'form-control',
     }))
+
+class NodoForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+        self.fields['nombre'].widget.attrs['autofocus'] = True
+
+    class Meta:
+        model = Nodo
+        fields = '__all__'
+        labels = {
+            'nombre':'Nombre',
+            'mikrotik':'Mikrotik',
+            'zona':'Zona',
+            'coordenadas':'Coordenadas',
+            'publicas_recibidas':'Publicas Recibidas',
+            'recepcion':'Recepcion',
+            'equipo_proveedor':'Equipo del proveedor',
+            'imagen_equipo_proveedor':'Imagen del equipo del proveedor',
+            'equipo_propio':'Equipo del Nodo',
+            'imagen_equpo_propio':'Imagen del equipo borde del nodo',
+            'descripcion':'Descripcion'   
+
+        }
+        widgets = {
+            'nombre': TextInput(
+                attrs={
+                    'placeholder': 'Nombre del Nodo'
+                }
+            )
+        }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                form.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+    

@@ -155,12 +155,12 @@ class Nodo(models.Model):
     
     def get_imagen_equipo_proveedor(self):
         if self.imagen_equipo_proveedor:
-            return '{}{}'.format(MEDIA_URL, self.image)
+            return '{}{}'.format(MEDIA_URL, self.imagen_equipo_proveedor)
         return '{}{}'.format(STATIC_URL, 'img/empty.png')
         
     def get_imagen_equipo_propio(self):
         if self.imagen_equpo_propio:
-            return '{}{}'.format(MEDIA_URL, self.image)
+            return '{}{}'.format(MEDIA_URL, self.imagen_equpo_propio)
         return '{}{}'.format(STATIC_URL, 'img/empty.png')
         
     def toJSON(self):

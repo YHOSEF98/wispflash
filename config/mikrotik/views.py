@@ -1070,6 +1070,111 @@ class DeshabilitarServicioView(DetailView):
         context["content_jqueryConfirm"] = '¿Estas seguro de deshabilitar este serivcio?'
         return context
 
+class NodoCreateView(CreateView):
+    model = Nodo
+    form_class = NodoForm
+    template_name = 'mikrotik/createform.html'
+    success_url = reverse_lazy('mikrolist')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'add':
+                form = self.get_form()
+                data = form.save()
+                aviso = 'Nodo creado correctamente'
+                request.session['aviso'] = aviso
+            else:
+                data['error']= 'No entro por ninguna opcion'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'Crear nuevo nodo'
+        context["entity"] = 'Nodo'
+        context["list_url"] = reverse_lazy('mikrolist')
+        context["action"] = 'add'
+        context["content_jqueryConfirm"] = '¿Estas seguro de crear este nodo?'
+        return context
+
+class NodoUpdateView(UpdateView):
+    model = Nodo
+    form_class = NodoForm
+    template_name = 'mikrotik/createform.html'
+    success_url = reverse_lazy('mikrolist')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'edit':
+                form = self.get_form()
+                data = form.save()
+                aviso = 'El nodo fue actualizada correctamente'
+                self.request.session['aviso'] = aviso
+            else:
+                data['error']= 'No entro por ninguna opcion'
+        except Exception as e:
+            data['error'] = str(e)    
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'Edicion de un Nodo'
+        context["entity"] = 'Nodo'
+        context["list_url"] = reverse_lazy('mikrolist')
+        context["action"] = 'edit'
+        context["content_jqueryConfirm"] = '¿Estas seguro de editar el Nodo?'
+        return context
+
+class NodoListView(ListView):
+    model = Nodo
+    template_name = 'mikrotik/nodo/nodolist.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'searchdata':
+                data = []
+                for i in Nodo.objects.all():
+                    data.append(i.toJSON())
+                else:
+                    data['error'] = 'A ocurrido un error'
+            # data = Mikrotik.objects.get(pk=request.POST['id']).toJSON()
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        aviso = self.request.session.get('aviso')
+        if aviso:
+            context['aviso'] = aviso
+            del self.request.session['aviso']
+        context["title"] = 'Listado de servidores MIkrotik'
+        context["create_url"] = reverse_lazy('nodo_list')
+        context["entity"] = 'Mikrotik'
+        context["list_url"] = reverse_lazy('nodo_list')
+        context["action"] = 'searchdata'
+        return context
+
 class test(TemplateView):
     template_name = 'mikrotik/selec.html'
 

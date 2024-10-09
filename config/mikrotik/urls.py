@@ -23,6 +23,9 @@ urlpatterns = [
     path("servicios/delet/<int:pk>", ServicioDeleteView.as_view(), name="serivciodelet"),
     path("servicio/desh/<int:pk>", DeshabilitarServicioView2.as_view(), name="serviciodesh"),
     path("servicio/hab/<int:pk>", HabilitarServicioView.as_view(), name="serviciohab"),
+    path("nodo/add", NodoCreateView.as_view(), name="nodo_add"),
+    path("nodo/edit/<int:pk>", NodoUpdateView.as_view(), name="nodo_edit"),
+    path("nodo/list", NodoListView.as_view(), name="nodo_list"),
     #path("test", test.as_view(), name="test"),
 ]
 

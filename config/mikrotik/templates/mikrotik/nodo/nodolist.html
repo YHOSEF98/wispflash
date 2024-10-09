@@ -1,0 +1,44 @@
+{% extends 'base/list.html' %}
+
+{% block columns %}
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Nombre</th>
+        <th scope="col">Mikrotik</th>
+        <th scope="col">Zona</th>
+        <th scope="col">Coordenadas</th>
+        <th scope="col">Publicas</th>
+        <th scope="col">Tipo</th>
+        <th scope="col">Equipo</th>
+        <th scope="col">Opciones</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+    {% for n in object_list %}
+        <tr>
+            <td> {{n.id}}</td>
+            <td> {{n.nombre}}</td>
+            <td> {{n.mikrotik}}</td>
+            <td> {{n.zona}}</td>
+            <td> {{n.coordenadas}}</td>
+            <td> {{n.publicas_recibidas}}</td>
+            <td> {{n.recepcion}}</td>
+            <td class="text-center"> 
+                <img src="{{n.get_imagen_equipo_propio}}" alt="" class="img-fluid d-block mx-auto" style="width: 20px; height: 20px;">
+            </td>
+            <td>
+                <a href="{% url 'mikrodetail' n.id %}" type="button" class="btn btn-warning btn-xs btn-flat">
+                    <i class="far fa-eye"></i>
+                </a>
+                <a href="{% url 'nodo_edit' n.id %}" type="button" class="btn btn-warning btn-xs btn-flat">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href=" {% url 'mikrodelet' n.id %}" type="button" class="btn btn-danger btn-xs btn-flat">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    
+{% endblock %}
