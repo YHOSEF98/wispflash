@@ -1,0 +1,38 @@
+{% extends 'base/list.html' %}
+
+{% block columns %}
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Nombre</th>
+        <th scope="col">Nodo</th>
+        <th scope="col">Ip</th>
+        <th scope="col">Zona</th>
+        <th scope="col">Coordenadas</th>
+        <th scope="col">Opciones</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+    {% for t in object_list %}
+        <tr>
+            <td> {{t.id}}</td>
+            <td> {{t.nombre}}</td>
+            <td> {{t.nodo}}</td>
+            <td> {{t.estacion_ip}}</td>
+            <td> {{t.zona}}</td>
+            <td> {{t.coordenadas}}</td>
+            <td>
+                <a href="{% url 'mikrodetail' t.id %}" type="button" class="btn btn-primary btn-xs btn-flat">
+                    <i class="far fa-eye"></i>
+                </a>
+                <a href="{% url 'torres_edit' t.id %}" type="button" class="btn btn-warning btn-xs btn-flat">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href=" {% url 'torres_delete' t.id %}" type="button" class="btn btn-danger btn-xs btn-flat">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    
+{% endblock %}

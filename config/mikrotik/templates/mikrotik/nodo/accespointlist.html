@@ -1,0 +1,44 @@
+{% extends 'base/list.html' %}
+
+{% block columns %}
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Nombre</th>
+        <th scope="col">IP</th>
+        <th scope="col">Equipo</th>
+        <th scope="col">SSID</th>
+        <th scope="col">Contraseña</th>
+        <th scope="col">Nodo</th>
+        <th scope="col">Torre</th>
+        <th scope="col">Opciones</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+    {% for a in object_list %}
+        <tr>
+            <td> {{a.id}}</td>
+            <td> {{a.nombre}}</td>
+            <td> {{a.ip}}</td>
+            <td class="text-center"> 
+                <img src="{{a.get_image}}" alt="" class="img-fluid d-block mx-auto" style="width: 20px; height: 20px;">
+            </td>
+            <td> {{a.ssid}}</td>
+            <td> {{a.seguridad}}</td>
+            <td> {{a.nodo}}</td>
+            <td> {{a.torre}}</td>
+            <td>
+                <a href="{% url 'mikrodetail' a.id %}" type="button" class="btn btn-primary btn-xs btn-flat">
+                    <i class="far fa-eye"></i>
+                </a>
+                <a href="{% url 'accespoint_edit' a.id %}" type="button" class="btn btn-warning btn-xs btn-flat">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href=" {% url 'accespoint_delete' a.id %}" type="button" class="btn btn-danger btn-xs btn-flat">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    
+{% endblock %}

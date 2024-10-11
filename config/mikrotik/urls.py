@@ -26,6 +26,15 @@ urlpatterns = [
     path("nodo/add", NodoCreateView.as_view(), name="nodo_add"),
     path("nodo/edit/<int:pk>", NodoUpdateView.as_view(), name="nodo_edit"),
     path("nodo/list", NodoListView.as_view(), name="nodo_list"),
+    path("nodo/delete/<int:pk>", NodoDeleteView.as_view(), name="nodo_delete"),
+    path("accespoint/add", AccespointCreateView.as_view(), name="accespoint_add"),
+    path("accespoint/list", AccespointListView.as_view(), name="accespoint_list"),
+    path("accespoint/edit/<int:pk>", AccespointUpdateView.as_view(), name="accespoint_edit"),
+    path("accespoint/delete/<int:pk>", AccespointDeleteView.as_view(), name="accespoint_delete"),
+    path("torre/add", TorreCreateView.as_view(), name="torre_add"),
+    path("torre/list", TorreListView.as_view(), name="torres_list"),
+    path("torre/edit/<int:pk>", TorreUpdateView.as_view(), name="torres_edit"),
+    path("torre/delete/<int:pk>", TorreDeleteView.as_view(), name="torres_delete"),
     #path("test", test.as_view(), name="test"),
 ]
 

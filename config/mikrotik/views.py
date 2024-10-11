@@ -896,6 +896,7 @@ class ServicioDeleteView(DeleteView):
         context["content_jqueryConfirm"] = 'Estas seguro de eliminar este servicio'
         return context
 
+
 class DeshabilitarServicioView2(UpdateView):
     template_name = 'mikrotik/serviciodesh.html'
     model = Servicio
@@ -1070,11 +1071,12 @@ class DeshabilitarServicioView(DetailView):
         context["content_jqueryConfirm"] = '¿Estas seguro de deshabilitar este serivcio?'
         return context
 
+
 class NodoCreateView(CreateView):
     model = Nodo
     form_class = NodoForm
     template_name = 'mikrotik/createform.html'
-    success_url = reverse_lazy('mikrolist')
+    success_url = reverse_lazy('nodo_list')
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
@@ -1099,7 +1101,7 @@ class NodoCreateView(CreateView):
         context = super().get_context_data(**kwargs)
         context["title"] = 'Crear nuevo nodo'
         context["entity"] = 'Nodo'
-        context["list_url"] = reverse_lazy('mikrolist')
+        context["list_url"] = reverse_lazy('nodo_list')
         context["action"] = 'add'
         context["content_jqueryConfirm"] = '¿Estas seguro de crear este nodo?'
         return context
@@ -1108,7 +1110,7 @@ class NodoUpdateView(UpdateView):
     model = Nodo
     form_class = NodoForm
     template_name = 'mikrotik/createform.html'
-    success_url = reverse_lazy('mikrolist')
+    success_url = reverse_lazy('nodo_list')
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
@@ -1134,7 +1136,7 @@ class NodoUpdateView(UpdateView):
         context = super().get_context_data(**kwargs)
         context["title"] = 'Edicion de un Nodo'
         context["entity"] = 'Nodo'
-        context["list_url"] = reverse_lazy('mikrolist')
+        context["list_url"] = reverse_lazy('nodo_list')
         context["action"] = 'edit'
         context["content_jqueryConfirm"] = '¿Estas seguro de editar el Nodo?'
         return context
@@ -1174,6 +1176,306 @@ class NodoListView(ListView):
         context["list_url"] = reverse_lazy('nodo_list')
         context["action"] = 'searchdata'
         return context
+
+class NodoDeleteView(DeleteView):
+    model = Nodo
+    template_name = 'mikrotik/deletemikrotik.html'
+    success_url = reverse_lazy('nodo_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            self.object.delete()
+            aviso = 'El nodo ha sido eliminado'
+            self.request.session['aviso'] = aviso
+        except Exception as e:
+            data['error'] = str(e)    
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'Eliminacion de un servidor nodo'
+        context["entity"] = 'Nodo'
+        context["list_url"] = reverse_lazy('nodo_list')
+        context["action"] = 'edit'
+        context["content_jqueryConfirm"] = 'Estas seguro de eliminar el Nodo'
+        return context
+
+
+class AccespointCreateView(CreateView):
+    model = Accesspoint
+    form_class = AccesspointForm
+    template_name = 'mikrotik/createform.html'
+    success_url = reverse_lazy('accespoint_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'add':
+                form = self.get_form()
+                data = form.save()
+                aviso = 'Acces point creado correctamente'
+                request.session['aviso'] = aviso
+            else:
+                data['error']= 'No entro por ninguna opcion'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'Crear nuevo Acces Point'
+        context["entity"] = 'Access Point'
+        context["list_url"] = reverse_lazy('accespoint_list')
+        context["action"] = 'add'
+        context["content_jqueryConfirm"] = '¿Estas seguro de crear este Access Point?'
+        return context
+
+class AccespointListView(ListView):
+    model = Accesspoint
+    template_name = 'mikrotik/nodo/accespointlist.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'searchdata':
+                data = []
+                for i in Nodo.objects.all():
+                    data.append(i.toJSON())
+                else:
+                    data['error'] = 'A ocurrido un error'
+            # data = Mikrotik.objects.get(pk=request.POST['id']).toJSON()
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        aviso = self.request.session.get('aviso')
+        if aviso:
+            context['aviso'] = aviso
+            del self.request.session['aviso']
+        context["title"] = 'Listado de Access Point'
+        context["create_url"] = reverse_lazy('accespoint_add')
+        context["entity"] = 'Access point'
+        context["list_url"] = reverse_lazy('accespoint_list')
+        context["action"] = 'searchdata'
+        return context
+
+class AccespointUpdateView(UpdateView):
+    model = Accesspoint
+    form_class = AccesspointForm
+    template_name = 'mikrotik/createform.html'
+    success_url = reverse_lazy('accespoint_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'edit':
+                form = self.get_form()
+                data = form.save()
+                aviso = 'El access point fue actualizada correctamente'
+                self.request.session['aviso'] = aviso
+            else:
+                data['error']= 'No entro por ninguna opcion'
+        except Exception as e:
+            data['error'] = str(e)    
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'Edicion de un Accespoint'
+        context["entity"] = 'Access Point'
+        context["list_url"] = reverse_lazy('accespoint_list')
+        context["action"] = 'edit'
+        context["content_jqueryConfirm"] = '¿Estas seguro de editar el access point?'
+        return context
+
+class AccespointDeleteView(DeleteView):
+    model = Accesspoint
+    template_name = 'mikrotik/deletemikrotik.html'
+    success_url = reverse_lazy('accespoint_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            self.object.delete()
+            aviso = 'El acces point ha sido eliminado'
+            self.request.session['aviso'] = aviso
+        except Exception as e:
+            data['error'] = str(e)    
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'Eliminacion de un servidor Acces Point'
+        context["entity"] = 'Access point'
+        context["list_url"] = reverse_lazy('accespoint_list')
+        context["action"] = 'edit'
+        context["content_jqueryConfirm"] = 'Estas seguro de eliminar el Access Point'
+        return context
+
+
+class TorreListView(ListView):
+    model = Torre
+    template_name = 'mikrotik/nodo/torreslist.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'searchdata':
+                data = []
+                for i in Nodo.objects.all():
+                    data.append(i.toJSON())
+                else:
+                    data['error'] = 'A ocurrido un error'
+            # data = Mikrotik.objects.get(pk=request.POST['id']).toJSON()
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        aviso = self.request.session.get('aviso')
+        if aviso:
+            context['aviso'] = aviso
+            del self.request.session['aviso']
+        context["title"] = 'Listado de Torres'
+        context["create_url"] = reverse_lazy('torre_add')
+        context["entity"] = 'Torres'
+        context["list_url"] = reverse_lazy('torres_list')
+        context["action"] = 'searchdata'
+        return context
+
+class TorreCreateView(CreateView):
+    model = Torre
+    form_class = TorreForm
+    template_name = 'mikrotik/createform.html'
+    success_url = reverse_lazy('torres_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'add':
+                form = self.get_form()
+                data = form.save()
+                aviso = 'Torre creada correctamente'
+                request.session['aviso'] = aviso
+            else:
+                data['error']= 'No entro por ninguna opcion'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'Crear nuevo Acces Point'
+        context["entity"] = 'Nodo'
+        context["list_url"] = reverse_lazy('torres_list')
+        context["action"] = 'add'
+        context["content_jqueryConfirm"] = '¿Estas seguro de crear esta torre?'
+        return context
+
+class TorreUpdateView(UpdateView):
+    model = Torre
+    form_class = TorreForm
+    template_name = 'mikrotik/createform.html'
+    success_url = reverse_lazy('torres_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'edit':
+                form = self.get_form()
+                data = form.save()
+                aviso = 'La torre fue actualizada correctamente'
+                self.request.session['aviso'] = aviso
+            else:
+                data['error']= 'No entro por ninguna opcion'
+        except Exception as e:
+            data['error'] = str(e)    
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'Edicion de una Torre'
+        context["entity"] = 'Torres'
+        context["list_url"] = reverse_lazy('torres_list')
+        context["action"] = 'edit'
+        context["content_jqueryConfirm"] = '¿Estas seguro de editar la torre?'
+        return context
+
+class TorreDeleteView(DeleteView):
+    model = Torre
+    template_name = 'mikrotik/deletemikrotik.html'
+    success_url = reverse_lazy('torres_list')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            self.object.delete()
+            aviso = 'La torre ha sido eliminada'
+            self.request.session['aviso'] = aviso
+        except Exception as e:
+            data['error'] = str(e)    
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = 'Eliminacion de una Torre'
+        context["entity"] = 'Torres'
+        context["list_url"] = reverse_lazy('torres_list')
+        context["action"] = 'edit'
+        context["content_jqueryConfirm"] = 'Estas seguro de eliminar la torre'
+        return context
+
 
 class test(TemplateView):
     template_name = 'mikrotik/selec.html'

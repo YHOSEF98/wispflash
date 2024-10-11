@@ -1,10 +1,10 @@
 {% load static %}
 <aside class="main-sidebar sidebar-light-primary elevation-4">
     <a href="#" class="brand-link">
-        <img src="{% static 'base/img/logo.png' %}"
+        <img src="{% static 'base/img/diseno.png' %}"
              alt="WispFlash Logo"
-             class="brand-image img-circle elevation-3"
-             style="opacity: .8">
+             class="brand-image"
+             style="opacity: .9">
         <span class="brand-text font-weight-light">WispFlash</span>
     </a>
     <div class="sidebar">
@@ -118,6 +118,12 @@
                         </a>
                       </li>
                       <li class="nav-item">
+                        <a href="#" class="nav-link">
+                          <i class="fab fa-servicestack"></i>
+                          <p> OLT'S</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
                         <a href="{% url 'planeslist' %}" class="nav-link">
                           <i class="far fa-paper-plane"></i>
                           <p> Planes de navegacion</p>
@@ -135,20 +141,26 @@
                     <a href="#" class="nav-link">
                       <i class="fas fa-map-marked-alt"></i>
                       <p>
-                        Zonas
+                        Red
                         <i class="fas fa-angle-left right"></i>
                       </p>
                     </a>
                     <ul class="nav nav-treeview">
                       <li class="nav-item">
-                        <a href=""  class="nav-link">
+                        <a href="{% url 'nodo_list' %}"  class="nav-link">
                           <i class="fas fa-network-wired"></i>
                           <p> Nodos</p>
                         </a>
                       </li>
                       <li class="nav-item">
-                        <a href="" class="nav-link">
-                          <i class="far fa-paper-plane"></i>
+                        <a href="{% url 'torres_list' %}"  class="nav-link">
+                          <i class="fas fa-broadcast-tower"></i>
+                          <p> Torres</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="{% url 'accespoint_list' %}" class="nav-link">
+                          <i class="fas fa-wifi"></i>
                           <p> Access Point</p>
                         </a>
                       </li>
@@ -156,6 +168,12 @@
                         <a href="{% url 'zonaslist' %}" class="nav-link">
                           <i class="fas fa-map-marker-alt"></i>
                           <p> Zonas</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="" class="nav-link">
+                          <i class="fas fa-map"></i>
+                          <p> Mapa de red</p>
                         </a>
                       </li>
                     </ul>

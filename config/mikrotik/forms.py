@@ -250,3 +250,82 @@ class NodoForm(ModelForm):
             data['error'] = str(e)
         return data
     
+class AccesspointForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+        self.fields['nombre'].widget.attrs['autofocus'] = True
+
+    class Meta:
+        model = Accesspoint
+        fields = '__all__'
+        labels = {
+            'nombre':'Nombre',
+            'ip':'Direccion IP',
+            'image':'Imagen del equipo',
+            'ssid':'SSID',
+            'seguridad':'Contraseña de acceso',
+            'nodo':'Nodo',
+            'torre':'Torre',
+            'descripcion':'Descripcion'
+
+        }
+        widgets = {
+            'nombre': TextInput(
+                attrs={
+                    'placeholder': 'Nombre del Nodo'
+                }
+            )
+        }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                form.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+    
+class TorreForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+        self.fields['nombre'].widget.attrs['autofocus'] = True
+
+    class Meta:
+        model = Torre
+        fields = '__all__'
+        labels = {
+            'nombre':'Nombre',
+            'nodo':'Nodo',
+            'estacion_ip':'Ip estacion',
+            'zona':'Zona',
+            'coordenadas':'Coordenadas'
+
+        }
+        widgets = {
+            'nombre': TextInput(
+                attrs={
+                    'placeholder': 'Nombre del Nodo'
+                }
+            )
+        }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                form.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+    
